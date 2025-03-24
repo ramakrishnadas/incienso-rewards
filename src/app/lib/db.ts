@@ -1,4 +1,4 @@
-import mysql, { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
+import mysql from 'mysql2/promise';
 
 const dbConfig = {
   host: process.env.DB_HOST,

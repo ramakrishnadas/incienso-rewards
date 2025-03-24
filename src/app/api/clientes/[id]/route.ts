@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
-import mysql, { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
+import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
         return NextResponse.json(rows[0]);
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Error fetching cliente' }, { status: 500 });
     }
 }
@@ -44,6 +45,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         return NextResponse.json({message: 'Cliente updated successfully'}, { status: 200 });
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Error updating cliente' }, { status: 500 });
     }
 }
@@ -64,6 +66,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
         return NextResponse.json({ message: 'Cliente deleted successfully' }, { status: 200 });
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Error deleting cliente' }, { status: 500 });
     }
 }

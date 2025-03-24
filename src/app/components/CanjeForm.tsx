@@ -54,8 +54,13 @@ export default function CanjeForm({ clienteId }: { clienteId: string }) {
         router.push("/movimientos");
       }, 1500); // Show success message briefly
 
-    } catch (err: any) {
-      setError(err.message || "Ocurrió un error");
+    } catch (err: unknown) {
+      // Check if the error is an instance of Error
+      if (err instanceof Error) {
+        setError(err.message || "Ocurrió un error");
+      } else {
+        setError("Ocurrió un error desconocido");
+      }
     } finally {
       setLoading(false);
     }

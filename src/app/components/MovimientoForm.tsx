@@ -55,7 +55,7 @@ export default function MovimientoForm({ movimientoId }: { movimientoId?: string
   }, [formData.monto, formData.tasa_puntos]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -88,8 +88,13 @@ export default function MovimientoForm({ movimientoId }: { movimientoId?: string
         router.push("/movimientos");
       }, 1500); // Slight delay to show success message
 
-    } catch (err: any) {
-      setError(err.message || "Ocurrió un error");
+    } catch (err: unknown) {
+      // Check if the error is an instance of Error
+      if (err instanceof Error) {
+        setError(err.message || "Ocurrió un error");
+      } else {
+        setError("Ocurrió un error desconocido");
+      }
     } finally {
       setLoading(false);
     }

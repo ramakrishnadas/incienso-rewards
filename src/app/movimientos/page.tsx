@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import DataTable from "react-data-table-component";
 import React from "react";
 import { fetchClients, fetchMovimientos } from "../lib/helper";
+import Link from "next/link";
 
 const TextField = styled.input`
 	height: 32px;
@@ -112,9 +113,9 @@ export default function MovimientosPage() {
       {
         name: '',
         selector: (row: Movimiento) => (
-          <a href={`/movimientos/${row.id}`} className="text-blue-500 ml-2">
+          <Link href={`/movimientos/${row.id}`} className="text-blue-500 ml-2">
             Editar
-          </a>
+          </Link>
         ),
       },
       {
@@ -147,7 +148,7 @@ export default function MovimientosPage() {
   return (
     <div>
       <h1 className="text-xl font-bold">Movimientos</h1>
-      <a href="/movimientos/nuevo" className="text-green-500">Registrar Movimiento</a>
+      <Link href="/movimientos/nuevo" className="text-green-500">Registrar Movimiento</Link>
       
       <DataTable
         title="Movimientos"

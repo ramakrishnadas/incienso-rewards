@@ -67,8 +67,13 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
         router.push("/clientes");
       }, 1500); // Slight delay to show success message
 
-    } catch (err: any) {
-      setError(err.message || "Ocurrió un error");
+    } catch (err: unknown) {
+      // Check if the error is an instance of Error
+      if (err instanceof Error) {
+        setError(err.message || "Ocurrió un error");
+      } else {
+        setError("Ocurrió un error desconocido");
+      }
     } finally {
       setLoading(false);
     }

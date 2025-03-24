@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import DataTable from "react-data-table-component";
 import React from "react";
 import { fetchClients } from "../lib/helper";
+import Link from "next/link";
 
 const TextField = styled.input`
 	height: 32px;
@@ -104,18 +105,18 @@ export default function ClientesPage() {
     {
       name: '',
       selector: (row: Cliente) => (
-        <a href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2">
+        <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2">
           Canjear Puntos
-        </a>
+        </Link>
       ),
       grow: 2
     },
     {
       name: '',
       selector: (row: Cliente) => (
-        <a href={`/clientes/${row.id}`} className="text-blue-500 ml-2">
+        <Link href={`/clientes/${row.id}`} className="text-blue-500 ml-2">
           Editar
-        </a>
+        </Link>
       ),
     },
     {
@@ -140,7 +141,7 @@ export default function ClientesPage() {
   return (
     <div>
       <h1 className="text-xl font-bold">Clientes</h1>
-      <a href="/clientes/nuevo" className="text-green-500">Registrar Cliente</a>
+      <Link href="/clientes/nuevo" className="text-green-500">Registrar Cliente</Link>
       
       <DataTable
         title="Clientes"
