@@ -104,7 +104,7 @@ export default function ClientesPage() {
     },
     {
       name: '',
-      selector: (row: Cliente) => (
+      cell: (row: Cliente) => (
         <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2">
           Canjear Puntos
         </Link>
@@ -113,7 +113,7 @@ export default function ClientesPage() {
     },
     {
       name: '',
-      selector: (row: Cliente) => (
+      cell: (row: Cliente) => (
         <Link href={`/clientes/${row.id}`} className="text-blue-500 ml-2">
           Editar
         </Link>
@@ -121,7 +121,7 @@ export default function ClientesPage() {
     },
     {
       name: '',
-      selector: (row: Cliente) => (
+      cell: (row: Cliente) => (
         <button
           className="text-red-500 ml-2 cursor-pointer"
           onClick={() => deleteClient(String(row.id))}

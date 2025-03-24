@@ -112,7 +112,7 @@ export default function MovimientosPage() {
       },
       {
         name: '',
-        selector: (row: Movimiento) => (
+        cell: (row: Movimiento) => (
           <Link href={`/movimientos/${row.id}`} className="text-blue-500 ml-2">
             Editar
           </Link>
@@ -120,7 +120,7 @@ export default function MovimientosPage() {
       },
       {
         name: '',
-        selector: (row: Movimiento) => (
+        cell: (row: Movimiento) => (
           <button
             className="text-red-500 ml-2 cursor-pointer"
             onClick={() => deleteMovimiento(String(row.id))}
