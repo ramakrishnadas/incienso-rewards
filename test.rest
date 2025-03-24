@@ -1,0 +1,78 @@
+### Get clientes
+GET http://localhost:3000/api/clientes
+Content-Type: application/json
+
+### Create cliente
+POST http://localhost:3000/api/clientes
+Content-Type: application/json
+
+{
+   "nombre": "Manuel Perez",
+   "telefono": "984652352",
+   "email": "manuelperez@gmail.com",
+   "puntos": 10,
+   "puede_referir": false,
+   "referido_por": null
+}
+
+### Get cliente by ID
+GET http://localhost:3000/api/clientes/1005
+Content-Type: application/json
+
+### Update cliente by ID
+PUT http://localhost:3000/api/clientes/1002
+Content-Type: application/json
+
+{
+  "id": 1002,
+  "nombre": "Maria Antonieta Alvarez",
+  "telefono": "987654322",
+  "email": "maria.a.alvarez@gmail.com",
+  "puntos": 10,
+  "puede_referir": 1,
+  "referido_por": 1000,
+  "created_at": "2025-03-20T21:17:32.000Z"
+}
+
+### Delete cliente by ID
+DELETE http://localhost:3000/api/clientes/1005
+Content-Type: application/json
+
+
+
+
+### Get movimientos
+GET http://localhost:3000/api/movimientos
+Content-Type: application/json
+
+### Create movimiento
+POST http://localhost:3000/api/movimientos
+Content-Type: application/json
+
+{
+   "cliente_id": 1002,
+   "tipo": "Canje",
+   "monto": 450,
+   "puntos": -10,
+   "tasa_puntos": 1
+}
+
+### Get movimiento by ID
+GET http://localhost:3000/api/movimientos/2
+Content-Type: application/json
+
+### Update movimiento by ID
+PUT http://localhost:3000/api/movimientos/2
+Content-Type: application/json
+
+{
+   "cliente_id": 1002,
+   "tipo": "Bono por referido",
+   "monto": 150,
+   "puntos": 20,
+   "tasa_puntos": 1
+}
+
+### Delete movimiento by ID
+DELETE http://localhost:3000/api/movimientos/2
+Content-Type: application/json
