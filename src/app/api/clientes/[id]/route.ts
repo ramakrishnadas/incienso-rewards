@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import pool from '@/app/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }>}) {
     try {
         const { id } = await params;
 
+        console.log(id);
         if (isNaN(parseInt(id, 10))) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
