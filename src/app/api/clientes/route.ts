@@ -1,5 +1,5 @@
 import pool from '@/app/lib/db';
-import mysql, { ResultSetHeader } from 'mysql2/promise';
+import { ResultSetHeader } from 'mysql2/promise';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

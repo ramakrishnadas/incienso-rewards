@@ -76,3 +76,13 @@ Content-Type: application/json
 ### Delete movimiento by ID
 DELETE http://localhost:3000/api/movimientos/2
 Content-Type: application/json
+
+### Create usuario
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+   "nombre": "Jose Perez",
+   "email": "jose.perez@gmail.com",
+   "password": "jose1234"
+}

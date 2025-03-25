@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import { useQuery } from "@tanstack/react-query";
 import { Cliente } from "../lib/definitions";
 import styled from 'styled-components';
@@ -20,7 +21,7 @@ const TextField = styled.input`
   font-size: 11px;
   color: black;
 	&:hover {
-		cursor: pointer;
+		
 	}
 `;
 
@@ -55,7 +56,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
 			value={filterText}
 			onChange={onFilter}
 		/>
-		<ClearButton type="button" onClick={onClear}>
+		<ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
 			X
 		</ClearButton>
 	</>
@@ -105,7 +106,7 @@ export default function ClientesPage() {
     {
       name: '',
       cell: (row: Cliente) => (
-        <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2">
+        <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
           Canjear Puntos
         </Link>
       ),
@@ -114,7 +115,7 @@ export default function ClientesPage() {
     {
       name: '',
       cell: (row: Cliente) => (
-        <Link href={`/clientes/${row.id}`} className="text-blue-500 ml-2">
+        <Link href={`/clientes/${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
           Editar
         </Link>
       ),
@@ -123,7 +124,7 @@ export default function ClientesPage() {
       name: '',
       cell: (row: Cliente) => (
         <button
-          className="text-red-500 ml-2 cursor-pointer"
+          className="text-red-500 ml-2 cursor-pointer hover:bg-gray-200 p-2 rounded-sm"
           onClick={() => deleteClient(String(row.id))}
         >
           Eliminar
@@ -140,11 +141,11 @@ export default function ClientesPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold">Clientes</h1>
-      <Link href="/clientes/nuevo" className="text-green-500">Registrar Cliente</Link>
+      <h1 className="text-xl font-bold m-8">Clientes</h1>
+      <Link href="/clientes/nuevo" className="text-white mx-8 my-10 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Cliente</Link>
       
       <DataTable
-        title="Clientes"
+        title=""
         columns={columns}
         data={filteredItems}
         pagination

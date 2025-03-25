@@ -20,7 +20,7 @@ const TextField = styled.input`
   font-size: 12px;
   color: black;
 	&:hover {
-		cursor: pointer;
+		
 	}
 `;
 
@@ -55,7 +55,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
       value={filterText}
       onChange={onFilter}
     />
-    <ClearButton type="button" onClick={onClear}>
+    <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
       X
     </ClearButton>
   </>
@@ -113,7 +113,7 @@ export default function MovimientosPage() {
       {
         name: '',
         cell: (row: Movimiento) => (
-          <Link href={`/movimientos/${row.id}`} className="text-blue-500 ml-2">
+          <Link href={`/movimientos/${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
             Editar
           </Link>
         ),
@@ -122,7 +122,7 @@ export default function MovimientosPage() {
         name: '',
         cell: (row: Movimiento) => (
           <button
-            className="text-red-500 ml-2 cursor-pointer"
+            className="text-red-500 ml-2 cursor-pointer hover:bg-gray-200 p-2 rounded-sm"
             onClick={() => deleteMovimiento(String(row.id))}
           >
             Eliminar
@@ -147,11 +147,11 @@ export default function MovimientosPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold">Movimientos</h1>
-      <Link href="/movimientos/nuevo" className="text-green-500">Registrar Movimiento</Link>
+      <h1 className="text-xl font-bold m-8">Movimientos</h1>
+      <Link href="/movimientos/nuevo" className="text-white mx-8 my-2 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Movimiento</Link>
       
       <DataTable
-        title="Movimientos"
+        title=""
         columns={columns}
         data={filteredItems}
         pagination
@@ -159,6 +159,7 @@ export default function MovimientosPage() {
         subHeader
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
+        className=""
       />
 
     </div>
