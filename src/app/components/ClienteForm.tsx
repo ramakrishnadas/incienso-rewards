@@ -122,7 +122,7 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
           />
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-gray-700">Puntos</label>
           <input
             type="number"
@@ -131,7 +131,7 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
             onChange={handleChange}
             className="w-full border px-3 py-2 rounded text-black"
           />
-        </div>
+        </div> */}
 
         <div className="mb-4">
           <label className="inline-flex items-center text-black">
