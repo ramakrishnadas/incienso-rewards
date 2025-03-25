@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { fetchClients, calculatePoints } from "../lib/helper";
 import { Cliente } from "../lib/definitions";
 
-export default function MovimientoForm({ movimientoId }: { movimientoId?: string }) {
+export default function MovimientoForm({ movimientoId, clienteId }: { movimientoId?: string, clienteId?: string }) {
   const [formData, setFormData] = useState({
-    cliente_id: "",
+    cliente_id: clienteId,
     tipo: "Compra",
     monto: "",
     ticket: "",
@@ -24,6 +24,12 @@ export default function MovimientoForm({ movimientoId }: { movimientoId?: string
   const [success, setSuccess] = useState<string | null>(null);
 
   const { data: clientes } = useQuery({ queryKey: ["clientes"], queryFn: fetchClients });
+  
+  let cliente;
+  if (clienteId) {
+    cliente = clientes?.find((c: Cliente) => c.id === parseInt(clienteId));
+  }
+  
 
   useEffect(() => {
     if (movimientoId) {
@@ -107,23 +113,37 @@ export default function MovimientoForm({ movimientoId }: { movimientoId?: string
       {success && <p className="text-green-500 mb-2">{success}</p>}
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700">Cliente</label>
-          <select
-            name="cliente_id"
-            value={formData.cliente_id || ""}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-black"
-          >
-            <option value="">Seleccione un cliente</option>
-            {clientes?.map((c: Cliente) => (
-              <option key={c.id} value={c.id}>
-                {c.id} - {c.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        {cliente ? (
+          <div className="mb-4">
+            <label className="block text-gray-700">Cliente</label>
+            <input
+              type="text"
+              value={clienteId + " - " + cliente?.nombre} 
+              readOnly
+              className="w-full border px-3 py-2 rounded text-gray-500 cursor-not-allowed"
+            />
+          </div>
+        ) : (
+          <div className="mb-4">
+            <label className="block text-gray-700">Cliente</label>
+            <select
+              name="cliente_id"
+              value={formData.cliente_id || ""}
+              onChange={handleChange}
+              required
+              className="w-full border px-3 py-2 rounded text-black"
+            >
+              <option value="">Seleccione un cliente</option>
+              {clientes?.map((c: Cliente) => (
+                <option key={c.id} value={c.id}>
+                  {c.id} - {c.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        
+        
 
         <div className="mb-4">
           <label className="block text-gray-700">Ticket</label>

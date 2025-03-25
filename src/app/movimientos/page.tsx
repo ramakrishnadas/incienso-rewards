@@ -148,7 +148,7 @@ export default function MovimientosPage() {
   return (
     <div>
       <h1 className="text-xl font-bold m-8">Movimientos</h1>
-      <Link href="/movimientos/nuevo" className="text-white mx-8 my-2 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Movimiento</Link>
+      {/* <Link href="/movimientos/nuevo" className="text-white mx-8 my-2 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Movimiento</Link> */}
       
       <DataTable
         title=""

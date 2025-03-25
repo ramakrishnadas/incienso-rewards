@@ -106,6 +106,15 @@ export default function ClientesPage() {
     {
       name: '',
       cell: (row: Cliente) => (
+        <Link href={`/movimientos/nuevo?cliente_id=${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
+          Registrar Compra
+        </Link>
+      ),
+      grow: 2
+    },
+    {
+      name: '',
+      cell: (row: Cliente) => (
         <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
           Canjear Puntos
         </Link>
