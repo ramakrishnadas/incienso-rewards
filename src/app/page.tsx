@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center text-center bg-amber-50">
   
-      <h1 className="text-3xl font-bold mb-4 mt-10">Gestionar Incienso Rewards</h1>
+      <h1 className="text-3xl font-bold mb-4 mt-10">Incienso Rewards</h1>
       <Image
         src="/logo-incienso.png"
         width={400}
