@@ -41,4 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # test endpoints
-/test.rest
+test.rest
+

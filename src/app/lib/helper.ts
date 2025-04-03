@@ -9,6 +9,6 @@ export const fetchMovimientos = async () => {
 };
 
 export const calculatePoints = (monto: number, tasa_puntos: number) => {
-    const points = Math.round(monto * 0.1) * tasa_puntos;
+    const points = Math.round(monto * 0.07) * tasa_puntos;
     return points;
 }

@@ -82,7 +82,7 @@ POST http://localhost:3000/api/usuarios
 Content-Type: application/json
 
 {
-   "nombre": "Jose Perez",
-   "email": "jose.perez@gmail.com",
-   "password": "jose1234"
+   "nombre": "Nuna Palo Santo",
+   "email": "nuna.palosanto@gmail.com",
+   "password": "inciensorewards1234"
 }
