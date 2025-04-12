@@ -5,7 +5,7 @@ import { Cliente } from "../lib/definitions";
 import styled from 'styled-components';
 import DataTable from "react-data-table-component";
 import React from "react";
-import { fetchClients } from "../lib/helper";
+import { fetchClients, sendRewardMessages } from "../lib/helper";
 import Link from "next/link";
 
 const TextField = styled.input`
@@ -71,6 +71,8 @@ export default function ClientesPage() {
   
   const [filterText, setFilterText] = React.useState('');
 	const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
   const subHeaderComponentMemo = React.useMemo(() => {
 		const handleClear = () => {
@@ -148,11 +150,44 @@ export default function ClientesPage() {
     (c.telefono && c.telefono.toLowerCase().includes(filterText.toLowerCase()))
 	);
 
+  const handleSendMessages = async () => {
+    setLoading(true);
+    setMessage("");
+  
+    try {
+      const response = await sendRewardMessages();
+  
+      if (response.success) {
+        setMessage("✅ Mensajes enviados correctamente.");
+      } else {
+        setMessage(`❌ Error: ${response.error || "No se enviaron los mensajes."}`);
+      }
+    } catch (error) {
+      setMessage("❌ Error inesperado al enviar los mensajes.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <h1 className="text-xl font-bold m-8">Clientes</h1>
       <Link href="/clientes/nuevo" className="text-white mx-8 my-10 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Cliente</Link>
       
+      {/* <div className="mx-8 my-4 absolute top-20 right-0">
+        <button
+          onClick={handleSendMessages}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50 cursor-pointer"
+          disabled={loading}
+        >
+          {loading ? "Enviando..." : "Enviar Mensajes de Recompensa"}
+        </button>
+        {message && (
+          <p className="mt-2 text-sm text-gray-700">{message}</p>
+        )}
+      </div> */}
+
       <DataTable
         title=""
         columns={columns}

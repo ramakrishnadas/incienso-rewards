@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const TextField = styled.input`
 	height: 32px;
-	width: 200px;
+	width: 300px;
 	border-radius: 3px;
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
@@ -50,7 +50,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
     <TextField
       id="search"
       type="text"
-      placeholder="Filtrar por cliente o ticket"
+      placeholder="Filtrar por cliente, telefono o ticket"
       aria-label="Search Input"
       value={filterText}
       onChange={onFilter}
@@ -68,7 +68,8 @@ async function deleteMovimiento(id: string) {
 
 export default function MovimientosPage() {
 
-  const [filterText, setFilterText] = React.useState('');
+    const [filterText, setFilterText] = React.useState('');
+    const [tipoFilter, setTipoFilter] = React.useState('');
     const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false);
   
     const subHeaderComponentMemo = React.useMemo(() => {
@@ -95,11 +96,17 @@ export default function MovimientosPage() {
       { name: 'Cliente ID', selector: (row: Movimiento) => row.cliente_id },
       { name: 'Nombre del Cliente', selector: (row: Movimiento) => {
         if (!clientes) return false;
-        const referrer = clientes.find((c: Cliente) => c.id === row.cliente_id);
-        return referrer ? referrer.nombre : 'N/A';
+        const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
+        return cliente ? cliente.nombre : 'N/A';
         }, sortable: true, grow: 2
       },
-      { name: 'Tipo', selector: (row: Movimiento) => row.tipo, sortable: true, grow: 2 },
+      { name: 'Teléfono del Cliente', selector: (row: Movimiento) => {
+        if (!clientes) return false;
+        const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
+        return cliente ? cliente.telefono : 'N/A';
+        }, grow: 2
+      },
+      { name: 'Tipo', selector: (row: Movimiento) => row.tipo, sortable: true, grow: 2.5 },
       { name: 'Monto', selector: (row: Movimiento) => row.monto },
       { name: 'Ticket', selector: (row: Movimiento) => row.ticket, grow: 2 },
       { name: 'Puntos', selector: (row: Movimiento) => row.puntos, sortable: true },
@@ -134,22 +141,40 @@ export default function MovimientosPage() {
 
   const filteredItems = movimientos.filter((m: Movimiento) => {
     if (!clientes) return false;
-    const cliente = clientes.find((c: Cliente) => c.id === m.cliente_id);  // Find the client by ID
-    const clientName = cliente ? cliente.nombre.toLowerCase() : ''; // Get the client's name or empty string if not found
-    
-    // Filter by client name or type
-    return (
-      (m.tipo && m.tipo.toLowerCase().includes(filterText.toLowerCase())) || // Filter by 'tipo'
-      clientName.includes(filterText.toLowerCase()) // Filter by 'nombre' (client name)
-    );
-    
+  
+    const cliente = clientes.find((c: Cliente) => c.id === m.cliente_id);
+    const clientName = cliente ? cliente.nombre.toLowerCase() : '';
+    const clientPhone = cliente ? cliente.telefono.toLowerCase() : '';
+  
+    const lowerFilter = filterText.toLowerCase();
+    const matchesTextFilter =
+      clientName.includes(lowerFilter) ||
+      clientPhone.includes(lowerFilter) ||
+      (m.ticket && m.ticket.toLowerCase().includes(lowerFilter));
+  
+    const matchesTipoFilter = tipoFilter === '' || m.tipo === tipoFilter;
+  
+    return matchesTextFilter && matchesTipoFilter;
   });
 
   return (
     <div>
       <h1 className="text-xl font-bold m-8">Movimientos</h1>
       {/* <Link href="/movimientos/nuevo" className="text-white mx-8 my-2 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Movimiento</Link> */}
-      
+      <div className="flex items-center gap-4 mx-8 mb-4">
+        <label htmlFor="tipoFilter">Filtrar por tipo:</label>
+        <select
+          id="tipoFilter"
+          value={tipoFilter}
+          onChange={(e) => setTipoFilter(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">Todos</option>
+          <option value="Compra">Compra</option>
+          <option value="Canje">Canje</option>
+          <option value="Bono por primera compra">Bono por primera compra</option>
+        </select>
+      </div>
       <DataTable
         title=""
         columns={columns}

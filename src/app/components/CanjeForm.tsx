@@ -109,7 +109,7 @@ export default function CanjeForm({ clienteId }: { clienteId: string }) {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 cursor-pointer"
           disabled={loading}
         >
           {loading ? "Guardando..." : "Registrar Canje"}

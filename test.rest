@@ -86,3 +86,6 @@ Content-Type: application/json
    "email": "nuna.palosanto@gmail.com",
    "password": "inciensorewards1234"
 }
+
+### Test WhatsApp API
+POST http://localhost:3000/api/send-messages

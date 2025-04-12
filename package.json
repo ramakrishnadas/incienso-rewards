@@ -11,7 +11,10 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@tanstack/react-query": "^5.69.0",
+    "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
+    "html2canvas": "^1.4.1",
+    "jsbarcode": "^3.11.6",
     "mysql2": "^3.14.0",
     "next": "15.2.3",
     "next-auth": "^4.24.11",
@@ -31,6 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
+    "html5-qrcode": "^2.3.8",
     "tailwindcss": "^4.0.15",
     "typescript": "^5"
   }

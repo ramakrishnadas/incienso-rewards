@@ -1,31 +1,183 @@
-import Link from "next/link";
-import { Metadata } from "next";
-import Image from "next/image";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Incienso Rewards",
-  description: "Programa de recompensas de Incienso Store",
-};
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { daysUntilExpiration, fetchClients, fetchCupones, redimirCupon } from "./lib/helper";
+import { Cliente, Cupon } from "./lib/definitions";
+import DataTable from "react-data-table-component";
+import HiddenCoupon from "./components/HiddenCoupon";
 
 export default function Home() {
-  return (
-    <div className="min-h-screen flex flex-col items-center text-center bg-amber-50">
+
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [cuponToRender, setCuponToRender] = useState<{
+    codigo: string;
+    clienteNombre: string;
+    fechaVencimiento: string;
+    puntos: number;
+  } | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: cupones, isLoading } = useQuery({ queryKey: ["cupones"], queryFn: fetchCupones });
+  const { data: clientes } = useQuery({ queryKey: ["clientes"], queryFn: fetchClients });
+
+
+  const soonExpiringCupones = cupones?.filter((c: Cupon) => {
+    if (c.redimido) return false;
+
+    const daysLeft = daysUntilExpiration(String(c.fecha_vencimiento));
+    return daysLeft <= 45; // Only cupones expiring in 1.5 months (≈ 45 days)
+  });
+
+  const sortedExpiringCupones = soonExpiringCupones?.sort((a: Cupon, b: Cupon) => {
+    const daysA = daysUntilExpiration(String(a.fecha_vencimiento));
+    const daysB = daysUntilExpiration(String(b.fecha_vencimiento));
+    return daysA - daysB; // cupones closer to expiring come first
+  });
+
+  const conditionalRowStyles = [
+    {
+      when: (row: Cupon) => {
+        const daysLeft = daysUntilExpiration(String(row.fecha_vencimiento));
+        return daysLeft <= 30;
+      },
+      style: {
+        backgroundColor: '#f8d7da',
+        
+      },
+    },
+    {
+      when: (row: Cupon) => {
+        const daysLeft = daysUntilExpiration(String(row.fecha_vencimiento));
+        return daysLeft > 30 && daysLeft <= 45;
+      },
+      style: {
+        backgroundColor: '#fff3cd',
+        
+      },
+    },
+  ];
+
+  const columns = [
+      { name: 'ID', selector: (row: Cupon) => row.id },
+      { name: 'Nombre del Cliente', selector: (row: Cupon) => {
+              if (!clientes) return false;
+              const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
+              return cliente ? cliente.nombre : 'N/A';
+              }, sortable: true, $grow: 2
+            },
+      { name: 'Codigo', selector: (row: Cupon) => row.codigo },
+      { name: 'Puntos', selector: (row: Cupon) => row.puntos, sortable: true, },
+      { name: 'Fecha de Vencimiento', selector: (row: Cupon) => {
+        const date = new Date(row.fecha_vencimiento); // Convert to Date object
+        const onlyDate = date.toISOString().split('T')[0];
+        return onlyDate;
+        }, $grow: 2
+      },
+      { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
+      {
+        name: '',
+        cell: (row: Cupon) => {
+          if (row.redimido) return null;
   
-      <h1 className="text-3xl font-bold mb-4 mt-10">Incienso Rewards</h1>
-      <Image
-        src="/logo-incienso.png"
-        width={400}
-        height={400}
-        alt="Picture of the author"
-      />
-      <p className="text-gray-600 mb-6">Gestiona clientes y movimientos con facilidad.</p>
-      <div className="flex space-x-4">
-        <Link href="/clientes" className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600">
-          Gestionar clientes
-        </Link>
-        <Link href="/movimientos" className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 no-underline">
-          Ver movimientos
-        </Link>
+          return (
+            <button
+              onClick={async () => {
+                setLoading(true);
+                setMessage(""); // Clear any previous message
+                try {
+                  const result = await redimirCupon(String(row.id));
+                  console.log("Cupón redimido:", result);
+                  setMessage("Cupón redimido exitosamente ✅");
+    
+                  queryClient.invalidateQueries({ queryKey: ["cupones"] });
+                
+                } catch (error) {
+                  console.error("Error redimiendo cupón:", error);
+                  setMessage("❌ Hubo un error al redimir el cupón.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
+            >
+              {loading ? "Redimiendo..." : "Redimir"}
+            </button>
+          )
+        },
+      },
+      {
+        name: '',
+        cell: (row: Cupon) => {
+          const cliente = clientes?.find((c: Cliente) => c.id === row.cliente_id);
+          const clienteNombre = cliente ? cliente.nombre : 'Cliente';
+          const fechaVencimiento = new Date(row.fecha_vencimiento).toISOString().split('T')[0];
+      
+          return (
+            <button
+              className="text-green-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
+              onClick={() => setCuponToRender({
+                codigo: row.codigo,
+                clienteNombre,
+                fechaVencimiento,
+                puntos: row.puntos
+              })}
+            >
+              Descargar Cupón
+            </button>
+          );
+        },
+        $grow: 2
+      },
+    ];
+
+  return (
+    <div className="bg-amber-50">
+      <div className="mx-20 flex flex-col items-center text-center bg-amber-50">
+    
+        <h1 className="text-3xl font-bold mb-4 mt-10">Incienso Rewards</h1>
+        {/* <Image
+          src="/logo-incienso.png"
+          width={100}
+          height={100}
+          alt="Picture of the author"
+        /> */}
+        
+        {message && (
+          <div className="text-center mt-4 font-medium text-gray-700">
+            {message}
+          </div>
+        )}
+        
+        <DataTable
+          title="Cupones por vencer"
+          columns={columns}
+          data={sortedExpiringCupones}
+          conditionalRowStyles={conditionalRowStyles}
+          pagination
+          subHeader
+          persistTableHead
+        />
+        
+        
+        {cuponToRender && (
+          <HiddenCoupon
+            codigo={cuponToRender.codigo}
+            clienteNombre={cuponToRender.clienteNombre}
+            fechaVencimiento={cuponToRender.fechaVencimiento}
+            puntos={cuponToRender.puntos}
+            onRenderComplete={(canvas) => {
+              const link = document.createElement('a');
+              link.download = `cupon-${cuponToRender.codigo}.png`;
+              link.href = canvas.toDataURL();
+              link.click();
+              setCuponToRender(null);
+            }}
+          />
+        )}
+        
       </div>
     </div>
   );

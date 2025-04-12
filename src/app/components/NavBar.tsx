@@ -14,6 +14,7 @@ export default function NavBar({ session }: NavBarProps) {
         { name: 'Inicio', href: '/', current: true },
         { name: 'Clientes', href: '/clientes', current: false },
         { name: 'Movimientos', href: '/movimientos', current: false },
+        { name: 'Cupones', href: '/cupones', current: false },        
     ]
 
     return (

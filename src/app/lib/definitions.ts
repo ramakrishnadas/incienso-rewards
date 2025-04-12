@@ -18,3 +18,13 @@ export type Movimiento = {
     tasa_puntos: number;
     fecha: Date;
 }
+
+export type Cupon = {
+    id: number;
+    cliente_id: number;
+    codigo: string;
+    puntos: number;
+    fecha_creacion: Date;
+    fecha_vencimiento: Date;
+    redimido: boolean;
+}
