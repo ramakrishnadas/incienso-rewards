@@ -1,16 +1,9 @@
 'use client';
 
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 
 const qrcodeRegionId = "html5qr-code-full-region";
-
-// interface Html5QrcodeScannerConfig {
-//   fps?: number;
-//   qrbox?: number | { width: number; height: number };
-//   aspectRatio?: number;
-//   disableFlip?: boolean;
-// }
 
 interface Html5QrcodePluginProps {
     fps?: number;
@@ -20,7 +13,11 @@ interface Html5QrcodePluginProps {
     verbose?: boolean;
     qrCodeSuccessCallback: (decodedText: string, decodedResult: any) => void;
     qrCodeErrorCallback?: (errorMessage: string) => void;
-  }
+}
+
+export interface Html5QrcodePluginHandle {
+  stopScanning: () => void;
+}
 
 const createConfig = (props: Html5QrcodePluginProps) => {
     const config = {
@@ -31,12 +28,17 @@ const createConfig = (props: Html5QrcodePluginProps) => {
     };
   
     return config;
-  };
+};
   
 
-const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
-  // Ref to store the scanner instance
+const Html5QrcodePlugin = forwardRef<Html5QrcodePluginHandle, Html5QrcodePluginProps>((props, ref) => {
   const html5QrcodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    stopScanning: () => {
+      html5QrcodeScannerRef.current?.clear().catch((err) => console.error("Error stopping scanner:", err));
+    }
+  }));
 
   useEffect(() => {
     const config = createConfig(props);
@@ -49,8 +51,7 @@ const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
     // Initialize the scanner and store the instance in the ref
     html5QrcodeScannerRef.current = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
     html5QrcodeScannerRef.current.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
-    // const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-    // html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+    
 
     return () => {
       // Cleanup and clear the scanner when component unmounts
@@ -63,6 +64,6 @@ const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
   }, []);
 
   return <div id={qrcodeRegionId} />;
-};
+});
 
 export default Html5QrcodePlugin;

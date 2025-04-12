@@ -58,17 +58,12 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
 
   // The callback when a QR code or barcode is successfully scanned
   const onScanSuccess = (decodedText: string, decodedResult: any) => {
-    // Update the input field with the decoded barcode value
     if (inputRef.current) {
-      inputRef.current.value = decodedText;  // Update the input value directly
+      inputRef.current.value = decodedText;
     }
-
-    // Stop the scanner once the barcode is successfully scanned
-    if (html5QrcodeScannerRef.current) {
-      html5QrcodeScannerRef.current.clear();  // Clear the scanner to stop it
-    }
+  
+    html5QrcodeScannerRef.current?.stopScanning(); // This now actually works
     const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
-    // Optionally, trigger the onFilter function if needed (e.g., simulate input change)
     onFilter(syntheticEvent);
   };
 
@@ -83,10 +78,11 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
         onChange={onFilter}
       />
       <Html5QrcodePlugin
-                  fps={10}
-                  qrbox={250}
-                  disableFlip={false}
-                  qrCodeSuccessCallback={onScanSuccess}
+        ref={html5QrcodeScannerRef}
+        fps={10}
+        qrbox={250}
+        disableFlip={false}
+        qrCodeSuccessCallback={onScanSuccess}
       />
       <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
         X
