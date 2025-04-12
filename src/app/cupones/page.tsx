@@ -47,28 +47,64 @@ interface FilterComponentProps {
   onClear: () => void;
 }
 
+// const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
+  
+//   const inputRef = useRef<HTMLInputElement>(null);
+//   const html5QrcodeScannerRef = useRef<any>(null);
+
+//   // The callback when a QR code or barcode is successfully scanned
+//   const onScanSuccess = (decodedText: string, decodedResult: any) => {
+//     if (inputRef.current) {
+//       inputRef.current.value = decodedText;
+//     }
+  
+//     html5QrcodeScannerRef.current?.stopScanning();
+//     const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
+//     onFilter(syntheticEvent);
+//   };
+
+//   return (
+//     <>
+//       <TextField
+//         id="search"
+//         type="text"
+//         placeholder="Filtrar por nombre o codigo"
+//         aria-label="Search Input"
+//         value={filterText}
+//         onChange={onFilter}
+//       />
+//       <Html5QrcodePlugin
+//         ref={html5QrcodeScannerRef}
+//         fps={10}
+//         qrbox={250}
+//         disableFlip={false}
+//         qrCodeSuccessCallback={onScanSuccess}
+//       />
+//       <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
+//         X
+//       </ClearButton>
+//     </>
+//   );
+// }
+
 const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
-  // const onNewScanResult = (decodedText: string, decodedResult: any) => {
-  //   // handle decoded results here
-  //   const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
-  //   onFilter(syntheticEvent);
-  // };
   const inputRef = useRef<HTMLInputElement>(null);
   const html5QrcodeScannerRef = useRef<any>(null);
+  const [showScanner, setShowScanner] = React.useState(false);
 
-  // The callback when a QR code or barcode is successfully scanned
   const onScanSuccess = (decodedText: string, decodedResult: any) => {
     if (inputRef.current) {
       inputRef.current.value = decodedText;
     }
-  
-    html5QrcodeScannerRef.current?.stopScanning(); // This now actually works
+
+    html5QrcodeScannerRef.current?.stopScanning?.();
     const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
     onFilter(syntheticEvent);
+    setShowScanner(false);
   };
 
   return (
-    <>
+    <div className="flex items-center gap-2 relative">
       <TextField
         id="search"
         type="text"
@@ -76,20 +112,34 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
         aria-label="Search Input"
         value={filterText}
         onChange={onFilter}
+        ref={inputRef}
+        onFocus={() => setShowScanner(true)}
       />
-      <Html5QrcodePlugin
-        ref={html5QrcodeScannerRef}
-        fps={10}
-        qrbox={250}
-        disableFlip={false}
-        qrCodeSuccessCallback={onScanSuccess}
-      />
-      <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
+      <ClearButton type="button" onClick={() => { onClear(); setShowScanner(false); }}>
         X
       </ClearButton>
-    </>
+
+      {showScanner && (
+        <div className="absolute top-full left-0 mt-2 z-50 bg-white shadow-lg p-2 rounded">
+          <Html5QrcodePlugin
+            ref={html5QrcodeScannerRef}
+            fps={10}
+            qrbox={250}
+            disableFlip={false}
+            qrCodeSuccessCallback={onScanSuccess}
+          />
+          <button
+            onClick={() => setShowScanner(false)}
+            className="mt-2 px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-xs"
+          >
+            Cerrar escáner
+          </button>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
 
 async function deleteCupon(id: string) {
   await fetch(`/api/cupones/${id}`, { method: "DELETE" });
