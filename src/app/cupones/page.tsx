@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cliente, Cupon } from "../lib/definitions";
 import styled from 'styled-components';
 import DataTable from "react-data-table-component";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect, useRef } from "react";
 import { fetchClients, fetchCupones, redimirCupon } from "../lib/helper";
 import HiddenCoupon from "../components/HiddenCoupon";
 import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
@@ -48,9 +48,27 @@ interface FilterComponentProps {
 }
 
 const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
-  const onNewScanResult = (decodedText: string, decodedResult: any) => {
-    // handle decoded results here
+  // const onNewScanResult = (decodedText: string, decodedResult: any) => {
+  //   // handle decoded results here
+  //   const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
+  //   onFilter(syntheticEvent);
+  // };
+  const inputRef = useRef<HTMLInputElement>(null);
+  const html5QrcodeScannerRef = useRef<any>(null);
+
+  // The callback when a QR code or barcode is successfully scanned
+  const onScanSuccess = (decodedText: string, decodedResult: any) => {
+    // Update the input field with the decoded barcode value
+    if (inputRef.current) {
+      inputRef.current.value = decodedText;  // Update the input value directly
+    }
+
+    // Stop the scanner once the barcode is successfully scanned
+    if (html5QrcodeScannerRef.current) {
+      html5QrcodeScannerRef.current.clear();  // Clear the scanner to stop it
+    }
     const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
+    // Optionally, trigger the onFilter function if needed (e.g., simulate input change)
     onFilter(syntheticEvent);
   };
 
@@ -68,7 +86,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
                   fps={10}
                   qrbox={250}
                   disableFlip={false}
-                  qrCodeSuccessCallback={onNewScanResult}
+                  qrCodeSuccessCallback={onScanSuccess}
       />
       <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
         X

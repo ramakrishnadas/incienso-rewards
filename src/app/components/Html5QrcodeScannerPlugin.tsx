@@ -1,16 +1,16 @@
 'use client';
 
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const qrcodeRegionId = "html5qr-code-full-region";
 
-interface Html5QrcodeScannerConfig {
-  fps?: number;
-  qrbox?: number | { width: number; height: number };
-  aspectRatio?: number;
-  disableFlip?: boolean;
-}
+// interface Html5QrcodeScannerConfig {
+//   fps?: number;
+//   qrbox?: number | { width: number; height: number };
+//   aspectRatio?: number;
+//   disableFlip?: boolean;
+// }
 
 interface Html5QrcodePluginProps {
     fps?: number;
@@ -35,6 +35,9 @@ const createConfig = (props: Html5QrcodePluginProps) => {
   
 
 const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
+  // Ref to store the scanner instance
+  const html5QrcodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
+
   useEffect(() => {
     const config = createConfig(props);
     const verbose = props.verbose === true;
@@ -43,13 +46,19 @@ const Html5QrcodePlugin: React.FC<Html5QrcodePluginProps> = (props) => {
       throw new Error("qrCodeSuccessCallback is a required callback.");
     }
 
-    const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-    html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+    // Initialize the scanner and store the instance in the ref
+    html5QrcodeScannerRef.current = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
+    html5QrcodeScannerRef.current.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+    // const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
+    // html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
 
     return () => {
-      html5QrcodeScanner.clear().catch(error => {
-        console.error("Failed to clear html5QrcodeScanner. ", error);
-      });
+      // Cleanup and clear the scanner when component unmounts
+      if (html5QrcodeScannerRef.current) {
+        html5QrcodeScannerRef.current.clear().catch(error => {
+          console.error("Failed to clear html5QrcodeScanner. ", error);
+        });
+      }
     };
   }, []);
 
