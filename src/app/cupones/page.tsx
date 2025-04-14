@@ -8,6 +8,7 @@ import React, { ChangeEvent, useEffect, useRef } from "react";
 import { fetchClients, fetchCupones, formatDate, redimirCupon } from "../lib/helper";
 import HiddenCoupon from "../components/HiddenCoupon";
 import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const TextField = styled.input`
 	height: 32px;
@@ -110,6 +111,8 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
     fechaVencimiento: string;
     puntos: number;
   } | null>(null);
+  const [confirmingCupon, setConfirmingCupon] = React.useState<Cupon | null>(null);
+  
 
   const cliente = queryClient.getQueryData<Cliente[]>(["clientes"])?.find(c => c.id === data.cliente_id);
   const clienteNombre = cliente ? cliente.nombre : "Cliente";
@@ -135,7 +138,7 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
       <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
         {message && <p className="text-sm text-gray-600">{message}</p>}
         {!data.redimido && (
-          <button onClick={handleRedimir} className="text-blue-500 hover:bg-gray-200 p-2 rounded-sm w-fit cursor-pointer">
+          <button onClick={() => setConfirmingCupon(data)} className="text-blue-500 hover:bg-gray-200 p-2 rounded-sm w-fit cursor-pointer">
             {loading ? "Redimiendo..." : "Redimir"}
           </button>
         )}
@@ -151,6 +154,29 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
           Descargar Cupón
         </button>
       </div>
+      {confirmingCupon && (
+        <ConfirmationModal
+          message={`¿Estás seguro de que deseas redimir el cupón de código ${confirmingCupon.codigo}?`}
+          confirmText="Sí, redimir"
+          cancelText="Cancelar"
+          onConfirm={async () => {
+            setLoading(true);
+            setMessage("");
+            try {
+              await redimirCupon(String(confirmingCupon.id));
+              setMessage("Cupón redimido exitosamente ✅");
+              queryClient.invalidateQueries({ queryKey: ["cupones"] });
+            } catch (error) {
+              console.error("Error redimiendo cupón:", error);
+              setMessage("❌ Hubo un error al redimir el cupón.");
+            } finally {
+              setLoading(false);
+              setConfirmingCupon(null);
+            }
+          }}
+          onCancel={() => setConfirmingCupon(null)}
+        />
+      )}
       {cuponToRender && (
         <HiddenCoupon
           codigo={cuponToRender.codigo}
@@ -182,6 +208,7 @@ export default function CuponesPage() {
   const [message, setMessage] = React.useState("");
   const [redimidoFilter, setRedimidoFilter] = React.useState<'No' | 'Sí' | 'Todos'>('No');
   const [showExpired, setShowExpired] = React.useState(false);
+  const [currentRow, setCurrentRow] = React.useState<Cupon | null>(null);
 
   const subHeaderComponentMemo = React.useMemo(() => {
 		const handleClear = () => {
@@ -358,12 +385,12 @@ export default function CuponesPage() {
         </select>
         <br />
         <div className="rounded-md bg-orange-200 p-2 ml-10">
-          <label className="flex items-center text-base gap-2">
+          <label className="flex items-center text-base gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={showExpired}
               onChange={(e) => setShowExpired(e.target.checked)}
-              className="accent-blue-500"
+              className="accent-blue-500 "
             />
             Mostrar vencidos
           </label>
@@ -382,7 +409,11 @@ export default function CuponesPage() {
         persistTableHead
         customStyles={customStyles}
         expandableRows 
+        expandableRowExpanded={(row) => (row === currentRow)}
         expandableRowsComponent={ExpandedComponent}
+        onRowExpandToggled={(bool, row) => setCurrentRow(row)}
+        expandOnRowClicked
+        highlightOnHover
       />
       
       <script src="html5-qrcode.min.js"></script>

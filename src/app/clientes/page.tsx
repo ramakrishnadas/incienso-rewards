@@ -94,6 +94,7 @@ export default function ClientesPage() {
 	const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+   const [currentRow, setCurrentRow] = React.useState<Cliente | null>(null);
 
   const subHeaderComponentMemo = React.useMemo(() => {
 		const handleClear = () => {
@@ -245,7 +246,11 @@ export default function ClientesPage() {
         customStyles={customStyles}
         striped
         expandableRows 
+        expandableRowExpanded={(row) => (row === currentRow)}
         expandableRowsComponent={ExpandedComponent}
+        onRowExpandToggled={(bool, row) => setCurrentRow(row)}
+        expandOnRowClicked
+        highlightOnHover
       />
       
     </div>

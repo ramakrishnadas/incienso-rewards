@@ -123,6 +123,7 @@ export default function MovimientosPage() {
     const [filterText, setFilterText] = React.useState('');
     const [tipoFilter, setTipoFilter] = React.useState('');
     const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false);
+     const [currentRow, setCurrentRow] = React.useState<Movimiento | null>(null);
   
     const subHeaderComponentMemo = React.useMemo(() => {
       const handleClear = () => {
@@ -291,7 +292,11 @@ export default function MovimientosPage() {
         customStyles={customStyles}
         striped
         expandableRows 
+        expandableRowExpanded={(row) => (row === currentRow)}
         expandableRowsComponent={ExpandedComponent}
+        onRowExpandToggled={(bool, row) => setCurrentRow(row)}
+        expandOnRowClicked
+        highlightOnHover
       />
 
     </div>

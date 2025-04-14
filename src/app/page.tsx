@@ -6,6 +6,7 @@ import { daysUntilExpiration, fetchClients, fetchCupones, formatDate, redimirCup
 import { Cliente, Cupon } from "./lib/definitions";
 import DataTable from "react-data-table-component";
 import HiddenCoupon from "./components/HiddenCoupon";
+import ConfirmationModal from "./components/ConfirmationModal";
 
 export default function Home() {
 
@@ -17,6 +18,7 @@ export default function Home() {
     fechaVencimiento: string;
     puntos: number;
   } | null>(null);
+  const [confirmingCupon, setConfirmingCupon] = useState<Cupon | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -139,23 +141,24 @@ export default function Home() {
   
           return (
             <button
-              onClick={async () => {
-                setLoading(true);
-                setMessage(""); // Clear any previous message
-                try {
-                  const result = await redimirCupon(String(row.id));
-                  console.log("Cupón redimido:", result);
-                  setMessage("Cupón redimido exitosamente ✅");
+              // onClick={async () => {
+              //   setLoading(true);
+              //   setMessage(""); // Clear any previous message
+              //   try {
+              //     const result = await redimirCupon(String(row.id));
+              //     console.log("Cupón redimido:", result);
+              //     setMessage("Cupón redimido exitosamente ✅");
     
-                  queryClient.invalidateQueries({ queryKey: ["cupones"] });
+              //     queryClient.invalidateQueries({ queryKey: ["cupones"] });
                 
-                } catch (error) {
-                  console.error("Error redimiendo cupón:", error);
-                  setMessage("❌ Hubo un error al redimir el cupón.");
-                } finally {
-                  setLoading(false);
-                }
-              }}
+              //   } catch (error) {
+              //     console.error("Error redimiendo cupón:", error);
+              //     setMessage("❌ Hubo un error al redimir el cupón.");
+              //   } finally {
+              //     setLoading(false);
+              //   }
+              // }}
+              onClick={() => setConfirmingCupon(row)}
               className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
             >
               {loading ? "Redimiendo..." : "Redimir"}
@@ -217,10 +220,32 @@ export default function Home() {
           pagination
           persistTableHead
           customStyles={customStyles}
-          className="custom-table"
+          
         />
         
-        
+        {confirmingCupon && (
+          <ConfirmationModal
+            message={`¿Estás seguro de que deseas redimir el cupón de código ${confirmingCupon.codigo}?`}
+            confirmText="Sí, redimir"
+            cancelText="Cancelar"
+            onConfirm={async () => {
+              setLoading(true);
+              setMessage("");
+              try {
+                await redimirCupon(String(confirmingCupon.id));
+                setMessage("Cupón redimido exitosamente ✅");
+                queryClient.invalidateQueries({ queryKey: ["cupones"] });
+              } catch (error) {
+                console.error("Error redimiendo cupón:", error);
+                setMessage("❌ Hubo un error al redimir el cupón.");
+              } finally {
+                setLoading(false);
+                setConfirmingCupon(null);
+              }
+            }}
+            onCancel={() => setConfirmingCupon(null)}
+          />
+        )}
         {cuponToRender && (
           <HiddenCoupon
             codigo={cuponToRender.codigo}
@@ -236,6 +261,8 @@ export default function Home() {
             }}
           />
         )}
+
+        
         
       </div>
     </div>
