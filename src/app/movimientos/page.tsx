@@ -2,10 +2,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Movimiento, Cliente } from "../lib/definitions";
 import styled from 'styled-components';
-import DataTable from "react-data-table-component";
-import React from "react";
+import DataTable, { ExpanderComponentProps } from "react-data-table-component";
+import React, { ChangeEvent, useRef } from "react";
 import { fetchClients, fetchMovimientos, formatDate } from "../lib/helper";
 import Link from "next/link";
+import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
 
 const TextField = styled.input`
 	height: 32px;
@@ -45,21 +46,72 @@ interface FilterComponentProps {
   onClear: () => void;
 }
 
-const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => (
-  <>
-    <TextField
-      id="search"
-      type="text"
-      placeholder="Filtrar por cliente, telefono o ticket"
-      aria-label="Search Input"
-      value={filterText}
-      onChange={onFilter}
-    />
-    <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
-      X
-    </ClearButton>
-  </>
-);
+const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const html5QrcodeScannerRef = useRef<any>(null);
+  const [showScanner, setShowScanner] = React.useState(false);
+
+  const onScanSuccess = (decodedText: string, decodedResult: any) => {
+    if (inputRef.current) {
+      inputRef.current.value = decodedText;
+    }
+
+    html5QrcodeScannerRef.current?.stopScanning?.();
+    const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
+    onFilter(syntheticEvent);
+    setShowScanner(false);
+  };
+
+  return (
+    <div className="flex items-center gap-2 relative">
+      <TextField
+        id="search"
+        type="text"
+        placeholder="Filtrar por cliente, telefono o ticket"
+        aria-label="Search Input"
+        value={filterText}
+        onChange={onFilter}
+        ref={inputRef}
+        onFocus={() => setShowScanner(true)}
+      />
+      <ClearButton type="button" onClick={() => { onClear(); setShowScanner(false); }}>
+        X
+      </ClearButton>
+
+      {showScanner && (
+        <div className="absolute top-full left-0 mt-2 z-50 bg-white shadow-lg p-2 rounded">
+          <Html5QrcodePlugin
+            ref={html5QrcodeScannerRef}
+            fps={10}
+            qrbox={250}
+            disableFlip={false}
+            qrCodeSuccessCallback={onScanSuccess}
+          />
+          <button
+            onClick={() => setShowScanner(false)}
+            className="mt-2 px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-xs cursor-pointer"
+          >
+            Cerrar escáner
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ExpandedComponent: React.FC<ExpanderComponentProps<Movimiento>> = ({ data }) => {
+  return (
+    <>
+      <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
+        <p>Cliente ID: {data.cliente_id}</p>
+        <p>Tasa de puntos: {data.tasa_puntos}</p>
+        <Link href={`/movimientos/${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
+          Editar
+        </Link>
+      </div>
+    </>
+  );
+};
 
 async function deleteMovimiento(id: string) {
   await fetch(`/api/movimientos/${id}`, { method: "DELETE" });
@@ -130,8 +182,7 @@ export default function MovimientosPage() {
   };
 
   const columns = [
-      // { name: 'ID', selector: (row: Movimiento) => row.id },
-      { name: 'Cliente ID', selector: (row: Movimiento) => row.cliente_id },
+      // { name: 'Cliente ID', selector: (row: Movimiento) => row.cliente_id },
       { name: 'Nombre', selector: (row: Movimiento) => {
         if (!clientes) return false;
         const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
@@ -171,22 +222,12 @@ export default function MovimientosPage() {
           },
         ],
       },
-      { name: 'Tasa', selector: (row: Movimiento) => row.tasa_puntos, grow: 1 },
       { name: 'Fecha', selector: (row: Movimiento) => {
         const fecha = new Date(row.fecha);
         const formattedDate = formatDate(fecha);
         return formattedDate;
         },
         grow: 2
-      },
-      {
-        name: '',
-        cell: (row: Movimiento) => (
-          <Link href={`/movimientos/${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
-            Editar
-          </Link>
-        ),
-        grow: 0.5
       },
       {
         name: '',
@@ -249,6 +290,8 @@ export default function MovimientosPage() {
         persistTableHead
         customStyles={customStyles}
         striped
+        expandableRows 
+        expandableRowsComponent={ExpandedComponent}
       />
 
     </div>

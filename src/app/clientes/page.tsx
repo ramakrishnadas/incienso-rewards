@@ -3,11 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Cliente } from "../lib/definitions";
 import styled from 'styled-components';
-import DataTable from "react-data-table-component";
+import DataTable, { ExpanderComponentProps } from "react-data-table-component";
 import React from "react";
 import { fetchClients, sendRewardMessages } from "../lib/helper";
 import Link from "next/link";
-import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
+
 
 const TextField = styled.input`
 	height: 32px;
@@ -63,6 +63,25 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
 		</ClearButton>
 	</>
 );
+
+
+const ExpandedComponent: React.FC<ExpanderComponentProps<Cliente>> = ({ data }) => {
+	return (
+    <>
+      <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
+        <Link href={`/movimientos/nuevo?cliente_id=${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
+          Registrar Compra
+        </Link>
+        <Link href={`/movimientos/canje?cliente_id=${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
+          Canjear Puntos
+        </Link>
+        <Link href={`/clientes/${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
+          Editar
+        </Link>
+      </div>
+    </>
+  );
+};
 
 async function deleteClient(id: string) {
   await fetch(`/api/clientes/${id}`, { method: "DELETE" });
@@ -160,33 +179,6 @@ export default function ClientesPage() {
     {
       name: '',
       cell: (row: Cliente) => (
-        <Link href={`/movimientos/nuevo?cliente_id=${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
-          Registrar Compra
-        </Link>
-      ),
-      grow: 1.6
-    },
-    {
-      name: '',
-      cell: (row: Cliente) => (
-        <Link href={`/movimientos/canje?cliente_id=${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
-          Canjear Puntos
-        </Link>
-      ),
-      grow: 1.5
-    },
-    {
-      name: '',
-      cell: (row: Cliente) => (
-        <Link href={`/clientes/${row.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
-          Editar
-        </Link>
-      ),
-      grow: 0.5
-    },
-    {
-      name: '',
-      cell: (row: Cliente) => (
         <button
           className="text-red-500 ml-2 cursor-pointer hover:bg-gray-200 p-2 rounded-sm"
           onClick={() => deleteClient(String(row.id))}
@@ -203,28 +195,28 @@ export default function ClientesPage() {
     (c.telefono && c.telefono.toLowerCase().includes(filterText.toLowerCase()))
 	);
 
-  const handleSendMessages = async () => {
-    setLoading(true);
-    setMessage("");
+  // const handleSendMessages = async () => {
+  //   setLoading(true);
+  //   setMessage("");
   
-    try {
-      const response = await sendRewardMessages();
+  //   try {
+  //     const response = await sendRewardMessages();
   
-      if (response.success) {
-        setMessage("✅ Mensajes enviados correctamente.");
-      } else {
-        setMessage(`❌ Error: ${response.error || "No se enviaron los mensajes."}`);
-      }
-    } catch (error) {
-      setMessage("❌ Error inesperado al enviar los mensajes.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.success) {
+  //       setMessage("✅ Mensajes enviados correctamente.");
+  //     } else {
+  //       setMessage(`❌ Error: ${response.error || "No se enviaron los mensajes."}`);
+  //     }
+  //   } catch (error) {
+  //     setMessage("❌ Error inesperado al enviar los mensajes.");
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
-    <div className="mx-5">
+    <div className="mx-20">
       <h1 className="text-xl font-bold m-8">Clientes</h1>
       <Link href="/clientes/nuevo" className="text-white mx-8 my-10 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Cliente</Link>
       
@@ -252,6 +244,8 @@ export default function ClientesPage() {
         persistTableHead
         customStyles={customStyles}
         striped
+        expandableRows 
+        expandableRowsComponent={ExpandedComponent}
       />
       
     </div>

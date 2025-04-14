@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cliente, Cupon } from "../lib/definitions";
 import styled from 'styled-components';
-import DataTable from "react-data-table-component";
+import DataTable, { ExpanderComponentProps } from "react-data-table-component";
 import React, { ChangeEvent, useEffect, useRef } from "react";
 import { fetchClients, fetchCupones, formatDate, redimirCupon } from "../lib/helper";
 import HiddenCoupon from "../components/HiddenCoupon";
@@ -90,7 +90,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
           />
           <button
             onClick={() => setShowScanner(false)}
-            className="mt-2 px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-xs"
+            className="mt-2 px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-xs cursor-pointer"
           >
             Cerrar escáner
           </button>
@@ -100,6 +100,75 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter,
   );
 };
 
+const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) => {
+	const queryClient = useQueryClient();
+  const [loading, setLoading] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+  const [cuponToRender, setCuponToRender] = React.useState<{
+    codigo: string;
+    clienteNombre: string;
+    fechaVencimiento: string;
+    puntos: number;
+  } | null>(null);
+
+  const cliente = queryClient.getQueryData<Cliente[]>(["clientes"])?.find(c => c.id === data.cliente_id);
+  const clienteNombre = cliente ? cliente.nombre : "Cliente";
+  const fechaVencimiento = formatDate(new Date(data.fecha_vencimiento));
+
+  const handleRedimir = async () => {
+    setLoading(true);
+    setMessage("");
+    try {
+      await redimirCupon(String(data.id));
+      setMessage("Cupón redimido exitosamente ✅");
+      queryClient.invalidateQueries({ queryKey: ["cupones"] });
+    } catch (error) {
+      console.error(error);
+      setMessage("❌ Hubo un error al redimir el cupón.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
+        {message && <p className="text-sm text-gray-600">{message}</p>}
+        {!data.redimido && (
+          <button onClick={handleRedimir} className="text-blue-500 hover:bg-gray-200 p-2 rounded-sm w-fit cursor-pointer">
+            {loading ? "Redimiendo..." : "Redimir"}
+          </button>
+        )}
+        <button 
+          onClick={() => setCuponToRender({
+              codigo: data.codigo,
+              clienteNombre,
+              fechaVencimiento,
+              puntos: data.puntos
+            })} 
+          className="text-green-500 hover:bg-gray-200 p-2 rounded-sm w-fit cursor-pointer"
+        >
+          Descargar Cupón
+        </button>
+      </div>
+      {cuponToRender && (
+        <HiddenCoupon
+          codigo={cuponToRender.codigo}
+          clienteNombre={cuponToRender.clienteNombre}
+          fechaVencimiento={cuponToRender.fechaVencimiento}
+          puntos={cuponToRender.puntos}
+          onRenderComplete={(canvas) => {
+            const link = document.createElement('a');
+            link.download = `cupon-${cuponToRender.codigo}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            setCuponToRender(null);
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 async function deleteCupon(id: string) {
   await fetch(`/api/cupones/${id}`, { method: "DELETE" });
@@ -111,18 +180,8 @@ export default function CuponesPage() {
   const [filterText, setFilterText] = React.useState('');
 	const [resetPaginationToggle, setResetPaginationToggle] = React.useState(false);
   const [message, setMessage] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-  const [cuponToRender, setCuponToRender] = React.useState<{
-    codigo: string;
-    clienteNombre: string;
-    fechaVencimiento: string;
-    puntos: number;
-  } | null>(null);
   const [redimidoFilter, setRedimidoFilter] = React.useState<'No' | 'Sí' | 'Todos'>('No');
   const [showExpired, setShowExpired] = React.useState(false);
-
-
-  const queryClient = useQueryClient();
 
   const subHeaderComponentMemo = React.useMemo(() => {
 		const handleClear = () => {
@@ -195,7 +254,6 @@ export default function CuponesPage() {
   };
 
   const columns = [
-    // { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
     { name: 'Nombre', selector: (row: Cupon) => {
       if (!clientes) return false;
       const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
@@ -238,60 +296,6 @@ export default function CuponesPage() {
     { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
     {
       name: '',
-      cell: (row: Cupon) => {
-        if (row.redimido) return null;
-
-        return (
-          <button
-            onClick={async () => {
-              setLoading(true);
-              setMessage(""); // Clear any previous message
-              try {
-                const result = await redimirCupon(String(row.id));
-                console.log("Cupón redimido:", result);
-                setMessage("Cupón redimido exitosamente ✅");
-  
-                queryClient.invalidateQueries({ queryKey: ["cupones"] });
-              
-              } catch (error) {
-                console.error("Error redimiendo cupón:", error);
-                setMessage("❌ Hubo un error al redimir el cupón.");
-              } finally {
-                setLoading(false);
-              }
-            }}
-            className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
-          >
-            {loading ? "Redimiendo..." : "Redimir"}
-          </button>
-        )
-      },
-    },
-    {
-      name: '',
-      cell: (row: Cupon) => {
-        const cliente = clientes?.find((c: Cliente) => c.id === row.cliente_id);
-        const clienteNombre = cliente ? cliente.nombre : 'Cliente';
-        const fechaVencimiento = new Date(row.fecha_vencimiento).toISOString().split('T')[0];
-    
-        return (
-          <button
-            className="text-green-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
-            onClick={() => setCuponToRender({
-              codigo: row.codigo,
-              clienteNombre,
-              fechaVencimiento,
-              puntos: row.puntos
-            })}
-          >
-            Descargar Cupón
-          </button>
-        );
-      },
-      grow: 2
-    },
-    {
-      name: '',
       cell: (row: Cupon) => (
         <button
           className="text-red-500 ml-2 cursor-pointer hover:bg-gray-200 p-2 rounded-sm"
@@ -330,7 +334,7 @@ export default function CuponesPage() {
 
 
   return (
-    <div className="mx-5">
+    <div className="mx-20">
       <h1 className="text-xl font-bold m-8">Cupones</h1>
       {message && (
         <div className="text-center mt-4 font-medium text-gray-700">
@@ -366,8 +370,6 @@ export default function CuponesPage() {
         </div>
       </div>
 
-      
-
       <DataTable
         title=""
         columns={columns}
@@ -379,22 +381,10 @@ export default function CuponesPage() {
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
         customStyles={customStyles}
+        expandableRows 
+        expandableRowsComponent={ExpandedComponent}
       />
-      {cuponToRender && (
-        <HiddenCoupon
-          codigo={cuponToRender.codigo}
-          clienteNombre={cuponToRender.clienteNombre}
-          fechaVencimiento={cuponToRender.fechaVencimiento}
-          puntos={cuponToRender.puntos}
-          onRenderComplete={(canvas) => {
-            const link = document.createElement('a');
-            link.download = `cupon-${cuponToRender.codigo}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            setCuponToRender(null);
-          }}
-        />
-      )}
+      
       <script src="html5-qrcode.min.js"></script>
     </div>
     

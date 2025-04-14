@@ -6,8 +6,6 @@ import { daysUntilExpiration, fetchClients, fetchCupones, formatDate, redimirCup
 import { Cliente, Cupon } from "./lib/definitions";
 import DataTable from "react-data-table-component";
 import HiddenCoupon from "./components/HiddenCoupon";
-import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
-import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 
 export default function Home() {
 
@@ -133,7 +131,7 @@ export default function Home() {
         return formattedDate;
         }, $grow: 1.5
       },
-      { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
+      { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No', grow: 0.5},
       {
         name: '',
         cell: (row: Cupon) => {
@@ -164,13 +162,16 @@ export default function Home() {
             </button>
           )
         },
+        grow: 0.5
       },
       {
         name: '',
         cell: (row: Cupon) => {
           const cliente = clientes?.find((c: Cliente) => c.id === row.cliente_id);
           const clienteNombre = cliente ? cliente.nombre : 'Cliente';
-          const fechaVencimiento = new Date(row.fecha_vencimiento).toISOString().split('T')[0];
+          const fecha = new Date(row.fecha_vencimiento);
+          
+          const fechaVencimiento = String(formatDate(fecha));
       
           return (
             <button

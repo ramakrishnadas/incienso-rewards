@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { Disclosure } from '@headlessui/react'
 import LogoutButton from "./LogoutButton";
-import Image from "next/image";
 
 // Add the session prop with boolean type
 interface NavBarProps {
@@ -12,10 +11,10 @@ interface NavBarProps {
 export default function NavBar({ session }: NavBarProps) {
     
     const navigation = [
-        { name: 'Inicio', href: '/', current: true },
-        { name: 'Clientes', href: '/clientes', current: false },
-        { name: 'Movimientos', href: '/movimientos', current: false },
-        { name: 'Cupones', href: '/cupones', current: false },        
+        { name: 'Inicio', href: '/', current: true, icon: 'fa-house' },
+        { name: 'Clientes', href: '/clientes', current: false, icon: 'fa-user' },
+        { name: 'Movimientos', href: '/movimientos', current: false, icon: 'fa-arrows-turn-to-dots' },
+        { name: 'Cupones', href: '/cupones', current: false, icon: 'fa-ticket' },        
     ]
 
     return (
@@ -39,7 +38,7 @@ export default function NavBar({ session }: NavBarProps) {
                                         href={item.href}
                                         className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white no-underline"
                                     >
-                                        {item.name}
+                                        <i className={`fa-solid ${item.icon} text-white`}></i>&nbsp;&nbsp;{item.name}
                                     </Link>
                                     ))}
                                     <LogoutButton />
