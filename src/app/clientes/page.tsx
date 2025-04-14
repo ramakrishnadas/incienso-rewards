@@ -7,10 +7,11 @@ import DataTable from "react-data-table-component";
 import React from "react";
 import { fetchClients, sendRewardMessages } from "../lib/helper";
 import Link from "next/link";
+import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 
 const TextField = styled.input`
 	height: 32px;
-	width: 200px;
+	width: 300px;
 	border-radius: 3px;
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
@@ -18,7 +19,7 @@ const TextField = styled.input`
 	border-bottom-right-radius: 0;
 	border: 1px solid #e5e5e5;
 	padding: 0 32px 0 16px;
-  font-size: 11px;
+  font-size: 14px;
   color: black;
 	&:hover {
 		
@@ -26,6 +27,7 @@ const TextField = styled.input`
 `;
 
 const ClearButton = styled.button`
+  border: 1px solid lightgray;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	border-top-right-radius: 5px;
@@ -91,19 +93,69 @@ export default function ClientesPage() {
 
   if (isLoading) return <p>Cargando...</p>;
 
+  const customStyles = {
+    table: {
+      style: {
+        border: '1px solid #D3D3D3',
+      },
+    },
+    header: {
+      style: {
+        fontSize: '20px',
+        fontWeight: 'bold',
+      },
+    },
+    subHeader: {
+      style: {
+      }
+    },
+    headRow: {
+      style: {
+        backgroundColor: '#ffffff',
+        fontWeight: 'bold',
+        fontSize: '14px'
+      },
+    },
+    rows: {
+      style: {
+        fontSize: '16px'
+      }
+    },
+    pagination: {
+      style: {
+        marginTop: '10px',
+        padding: '10px',
+        color: '#000000'
+      }
+    }
+  };
+
   const columns = [
-    { name: 'ID', selector: (row: Cliente) => row.id },
+    // { name: 'ID', selector: (row: Cliente) => row.id },
     { name: 'Nombre', selector: (row: Cliente) => row.nombre, sortable: true, grow: 2},
-    { name: 'Teléfono', selector: (row: Cliente) => row.telefono, },
+    { name: 'Teléfono', selector: (row: Cliente) => row.telefono, grow: 1.2},
     { name: 'Email', selector: (row: Cliente) => row.email, grow: 2 },
-    { name: 'Puntos', selector: (row: Cliente) => row.puntos, sortable: true, },
-    { name: 'Puede referir', selector: (row: Cliente) => row.puede_referir ? "Sí" : "No" },
+    { name: 'Puntos', 
+      selector: (row: Cliente) => row.puntos, 
+      sortable: true, 
+      width: '120px', 
+      conditionalCellStyles: [
+        {
+          when: () => true, // applies to every row
+          style: {
+            color: '#3846ae',
+            fontWeight: 'bold'
+          },
+        },
+      ],
+    },
+    { name: 'Referir', selector: (row: Cliente) => row.puede_referir ? "Sí" : "No" },
     { name: 'Referido por', selector: (row: Cliente) => {
       // Find the referrer's name based on the referred by ID
       const referrer = clientes.find((c: Cliente) => c.id === row.referido_por);
       return referrer ? referrer.nombre : 'N/A';
       },
-      grow: 2 
+      
     },
     {
       name: '',
@@ -112,7 +164,7 @@ export default function ClientesPage() {
           Registrar Compra
         </Link>
       ),
-      grow: 2
+      grow: 1.6
     },
     {
       name: '',
@@ -121,7 +173,7 @@ export default function ClientesPage() {
           Canjear Puntos
         </Link>
       ),
-      grow: 2
+      grow: 1.5
     },
     {
       name: '',
@@ -130,6 +182,7 @@ export default function ClientesPage() {
           Editar
         </Link>
       ),
+      grow: 0.5
     },
     {
       name: '',
@@ -171,7 +224,7 @@ export default function ClientesPage() {
   };
 
   return (
-    <div>
+    <div className="mx-5">
       <h1 className="text-xl font-bold m-8">Clientes</h1>
       <Link href="/clientes/nuevo" className="text-white mx-8 my-10 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Cliente</Link>
       
@@ -197,6 +250,8 @@ export default function ClientesPage() {
         subHeader
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
+        customStyles={customStyles}
+        striped
       />
       
     </div>

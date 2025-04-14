@@ -58,6 +58,6 @@ export function formatDate(fecha: Date) {
     const day = String(fecha.getDate()).padStart(2, '0');
     const month = String(fecha.getMonth() + 1).padStart(2, '0'); // Months are 0-based
     const year = fecha.getFullYear();
-    const formattedDate = `${day}-${month}-${year}`;
+    const formattedDate = `${day}/${month}/${year}`;
     return formattedDate;
 }

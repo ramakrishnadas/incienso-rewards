@@ -17,7 +17,7 @@ const TextField = styled.input`
 	border-bottom-right-radius: 0;
 	border: 1px solid #e5e5e5;
 	padding: 0 32px 0 16px;
-  font-size: 12px;
+  font-size: 14px;
   color: black;
 	&:hover {
 		
@@ -91,22 +91,60 @@ export default function MovimientosPage() {
 
   if (isLoading) return <p>Cargando...</p>;
 
+  const customStyles = {
+    table: {
+      style: {
+        border: '1px solid #D3D3D3',
+      },
+    },
+    header: {
+      style: {
+        fontSize: '20px',
+        fontWeight: 'bold',
+      },
+    },
+    subHeader: {
+      style: {
+      }
+    },
+    headRow: {
+      style: {
+        backgroundColor: '#ffffff',
+        fontWeight: 'bold',
+        fontSize: '14px'
+      },
+    },
+    rows: {
+      style: {
+        fontSize: '16px'
+      }
+    },
+    pagination: {
+      style: {
+        marginTop: '10px',
+        padding: '10px',
+        color: '#000000'
+      }
+    }
+    
+  };
+
   const columns = [
-      { name: 'ID', selector: (row: Movimiento) => row.id },
+      // { name: 'ID', selector: (row: Movimiento) => row.id },
       { name: 'Cliente ID', selector: (row: Movimiento) => row.cliente_id },
-      { name: 'Nombre del Cliente', selector: (row: Movimiento) => {
+      { name: 'Nombre', selector: (row: Movimiento) => {
         if (!clientes) return false;
         const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
         return cliente ? cliente.nombre : 'N/A';
         }, sortable: true, grow: 2
       },
-      { name: 'Teléfono del Cliente', selector: (row: Movimiento) => {
+      { name: 'Teléfono', selector: (row: Movimiento) => {
         if (!clientes) return false;
         const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
         return cliente ? cliente.telefono : 'N/A';
         }, grow: 2
       },
-      { name: 'Tipo', selector: (row: Movimiento) => row.tipo, sortable: true, grow: 2.5 },
+      { name: 'Tipo', selector: (row: Movimiento) => row.tipo, grow: 3 },
       { name: 'Monto', selector: (row: Movimiento) => {
         
         const formattedMonto = new Intl.NumberFormat('en-US', {
@@ -115,16 +153,31 @@ export default function MovimientosPage() {
             minimumFractionDigits: 2,
           }).format(parseFloat(row.monto));
           return row.monto ? formattedMonto : "";
-        } 
+        },
+        sortable: true 
       },
       { name: 'Ticket', selector: (row: Movimiento) => row.ticket, grow: 2 },
-      { name: 'Puntos', selector: (row: Movimiento) => row.puntos, sortable: true },
-      { name: 'Tasa de Puntos', selector: (row: Movimiento) => row.tasa_puntos, grow: 2 },
+      { name: 'Puntos', 
+        selector: (row: Movimiento) => row.puntos, 
+        sortable: true, 
+        width: '120px', 
+        conditionalCellStyles: [
+          {
+            when: () => true, // applies to every row
+            style: {
+              color: '#3846ae',
+              fontWeight: 'bold'
+            },
+          },
+        ],
+      },
+      { name: 'Tasa', selector: (row: Movimiento) => row.tasa_puntos, grow: 1 },
       { name: 'Fecha', selector: (row: Movimiento) => {
         const fecha = new Date(row.fecha);
         const formattedDate = formatDate(fecha);
         return formattedDate;
-        }
+        },
+        grow: 2
       },
       {
         name: '',
@@ -133,6 +186,7 @@ export default function MovimientosPage() {
             Editar
           </Link>
         ),
+        grow: 0.5
       },
       {
         name: '',
@@ -148,10 +202,10 @@ export default function MovimientosPage() {
       },
   ];
 
-  const filteredItems = movimientos.filter((m: Movimiento) => {
+  const filteredItems = movimientos?.filter((m: Movimiento) => {
     if (!clientes) return false;
   
-    const cliente = clientes.find((c: Cliente) => c.id === m.cliente_id);
+    const cliente = clientes?.find((c: Cliente) => c.id === m.cliente_id);
     const clientName = cliente ? cliente.nombre.toLowerCase() : '';
     const clientPhone = cliente ? cliente.telefono.toLowerCase() : '';
   
@@ -167,7 +221,7 @@ export default function MovimientosPage() {
   });
 
   return (
-    <div>
+    <div className="mx-5">
       <h1 className="text-xl font-bold m-8">Movimientos</h1>
       {/* <Link href="/movimientos/nuevo" className="text-white mx-8 my-2 bg-slate-700 hover:bg-gray-200 hover:text-slate-700 p-[15px] rounded-sm">Registrar Movimiento</Link> */}
       <div className="flex items-center gap-4 mx-8 mb-4">
@@ -193,7 +247,8 @@ export default function MovimientosPage() {
         subHeader
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
-        className=""
+        customStyles={customStyles}
+        striped
       />
 
     </div>

@@ -70,7 +70,7 @@ export default function Home() {
     },
     header: {
       style: {
-        backgroundColor: '#fffbeb',
+        
         fontSize: '20px',
         fontWeight: 'bold',
       },
@@ -78,12 +78,18 @@ export default function Home() {
     headRow: {
       style: {
         backgroundColor: '#ffffff',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        fontSize: '14px'
       },
+    },
+    rows: {
+      style: {
+        fontSize: '16px'
+      }
     },
     pagination: {
       style: {
-        backgroundColor: '#fffbeb',
+        
         marginTop: '10px',
         padding: '10px',
         color: '#000000'
@@ -93,26 +99,39 @@ export default function Home() {
   };
 
   const columns = [
-      { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
-      { name: 'Nombre del Cliente', selector: (row: Cupon) => {
+      // { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
+      { name: 'Nombre', selector: (row: Cupon) => {
         if (!clientes) return false;
         const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
         return cliente ? cliente.nombre : 'N/A';
         }, sortable: true, $grow: 2
       },
-      { name: 'Teléfono del Cliente', selector: (row: Cupon) => {
+      { name: 'Teléfono', selector: (row: Cupon) => {
         if (!clientes) return false;
         const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
         return cliente ? cliente.telefono : 'N/A';
         },
       },
       { name: 'Codigo', selector: (row: Cupon) => row.codigo },
-      { name: 'Puntos', selector: (row: Cupon) => row.puntos, sortable: true, },
-      { name: 'Fecha de Vencimiento', selector: (row: Cupon) => {
+      { name: 'Puntos', 
+        selector: (row: Cupon) => row.puntos, 
+        sortable: true, 
+        width: '120px', 
+        conditionalCellStyles: [
+          {
+            when: () => true, // applies to every row
+            style: {
+              color: '#3846ae',
+              fontWeight: 'bold'
+            },
+          },
+        ],
+      },
+      { name: 'Vencimiento', selector: (row: Cupon) => {
         const fechaVencimiento = new Date(row.fecha_vencimiento); // Convert to Date object
         const formattedDate = formatDate(fechaVencimiento);
         return formattedDate;
-        }, $grow: 2
+        }, $grow: 1.5
       },
       { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
       {
@@ -167,13 +186,13 @@ export default function Home() {
             </button>
           );
         },
-        $grow: 2
+        $grow: 3
       },
     ];
 
   return (
-    <div className="bg-amber-50">
-      <div className="mx-20 flex flex-col items-center text-center bg-amber-50">
+    <div className="">
+      <div className="mx-20 flex flex-col items-center text-center">
     
         <h1 className="text-3xl font-bold mb-4 mt-10">Incienso Rewards</h1>
         {/* <Image

@@ -11,7 +11,7 @@ import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
 
 const TextField = styled.input`
 	height: 32px;
-	width: 200px;
+	width: 300px;
 	border-radius: 3px;
 	border-top-left-radius: 5px;
 	border-bottom-left-radius: 5px;
@@ -19,7 +19,7 @@ const TextField = styled.input`
 	border-bottom-right-radius: 0;
 	border: 1px solid #e5e5e5;
 	padding: 0 32px 0 16px;
-  font-size: 11px;
+  font-size: 14px;
   color: black;
 	&:hover {
 		
@@ -46,46 +46,6 @@ interface FilterComponentProps {
   onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
 }
-
-// const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
-  
-//   const inputRef = useRef<HTMLInputElement>(null);
-//   const html5QrcodeScannerRef = useRef<any>(null);
-
-//   // The callback when a QR code or barcode is successfully scanned
-//   const onScanSuccess = (decodedText: string, decodedResult: any) => {
-//     if (inputRef.current) {
-//       inputRef.current.value = decodedText;
-//     }
-  
-//     html5QrcodeScannerRef.current?.stopScanning();
-//     const syntheticEvent = { target: { value: decodedText } } as ChangeEvent<HTMLInputElement>;
-//     onFilter(syntheticEvent);
-//   };
-
-//   return (
-//     <>
-//       <TextField
-//         id="search"
-//         type="text"
-//         placeholder="Filtrar por nombre o codigo"
-//         aria-label="Search Input"
-//         value={filterText}
-//         onChange={onFilter}
-//       />
-//       <Html5QrcodePlugin
-//         ref={html5QrcodeScannerRef}
-//         fps={10}
-//         qrbox={250}
-//         disableFlip={false}
-//         qrCodeSuccessCallback={onScanSuccess}
-//       />
-//       <ClearButton type="button" onClick={onClear} className="hover:bg-gray-200 p-2 rounded-sm">
-//         X
-//       </ClearButton>
-//     </>
-//   );
-// }
 
 const FilterComponent: React.FC<FilterComponentProps> = ({ filterText, onFilter, onClear }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -197,33 +157,83 @@ export default function CuponesPage() {
     },
   ];
 
+  const customStyles = {
+    table: {
+      style: {
+        border: '1px solid #D3D3D3',
+      },
+    },
+    header: {
+      style: {
+        fontSize: '20px',
+        fontWeight: 'bold',
+      },
+    },
+    subHeader: {
+      style: {
+      }
+    },
+    headRow: {
+      style: {
+        fontWeight: 'bold',
+        fontSize: '14px'      
+      },
+    },
+    rows: {
+      style: {
+        fontSize: '16px'      
+      },
+    },
+    pagination: {
+      style: {
+        marginTop: '10px',
+        padding: '10px',
+        color: '#000000'
+      }
+    }
+    
+  };
+
   const columns = [
-    { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
-    { name: 'Nombre del Cliente', selector: (row: Cupon) => {
+    // { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
+    { name: 'Nombre', selector: (row: Cupon) => {
       if (!clientes) return false;
       const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
       return cliente ? cliente.nombre : 'N/A';
       }, sortable: true, grow: 2
     },
-    { name: 'Teléfono del Cliente', selector: (row: Cupon) => {
+    { name: 'Teléfono', selector: (row: Cupon) => {
       if (!clientes) return false;
       const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
       return cliente ? cliente.telefono : 'N/A';
       }, grow: 2
     },
     { name: 'Codigo', selector: (row: Cupon) => row.codigo },
-    { name: 'Puntos', selector: (row: Cupon) => row.puntos, sortable: true, },
-    { name: 'Fecha de Creación', selector: (row: Cupon) => {
+    { name: 'Puntos', 
+      selector: (row: Cupon) => row.puntos, 
+      sortable: true, 
+      width: '120px', 
+      conditionalCellStyles: [
+        {
+          when: () => true, // applies to every row
+          style: {
+            color: '#3846ae',
+            fontWeight: 'bold'
+          },
+        },
+      ],
+    },
+    { name: 'Creación', selector: (row: Cupon) => {
       const fechaCreacion = new Date(row.fecha_creacion); // Convert to Date object
       const formattedDate = formatDate(fechaCreacion);
       return formattedDate;
-      }, grow: 2
+      }, grow: 1.5
     },
-    { name: 'Fecha de Vencimiento', selector: (row: Cupon) => {
+    { name: 'Vencimiento', selector: (row: Cupon) => {
       const fechaVencimiento = new Date(row.fecha_vencimiento); // Convert to Date object
       const formattedDate = formatDate(fechaVencimiento);
       return formattedDate;
-      }, grow: 2
+      }, grow: 1.5
     },
     { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
     {
@@ -320,7 +330,7 @@ export default function CuponesPage() {
 
 
   return (
-    <div>
+    <div className="mx-5">
       <h1 className="text-xl font-bold m-8">Cupones</h1>
       {message && (
         <div className="text-center mt-4 font-medium text-gray-700">
@@ -329,22 +339,22 @@ export default function CuponesPage() {
       )}
 
       <div className="flex items-center gap-2 mb-4 ml-4">
-        <label htmlFor="redimido-filter" className="text-sm font-medium text-gray-700">
+        <label htmlFor="redimido-filter" className="text-base font-medium text-gray-700">
           Mostrar cupones:
         </label>
         <select
           id="redimido-filter"
           value={redimidoFilter}
           onChange={(e) => setRedimidoFilter(e.target.value as 'No' | 'Sí' | 'Todos')}
-          className="border border-gray-300 rounded-md p-1 text-sm"
+          className="border border-gray-300 rounded-md p-1 text-base"
         >
           <option value="No">No redimidos</option>
           <option value="Sí">Redimidos</option>
           <option value="Todos">Todos</option>
         </select>
         <br />
-        <div className="rounded-md bg-orange-200 p-1.5 ml-10">
-          <label className="flex items-center text-sm gap-2">
+        <div className="rounded-md bg-orange-200 p-2 ml-10">
+          <label className="flex items-center text-base gap-2">
             <input
               type="checkbox"
               checked={showExpired}
@@ -368,6 +378,7 @@ export default function CuponesPage() {
         subHeader
         subHeaderComponent={subHeaderComponentMemo}
         persistTableHead
+        customStyles={customStyles}
       />
       {cuponToRender && (
         <HiddenCoupon

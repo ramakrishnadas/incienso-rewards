@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Disclosure } from '@headlessui/react'
 import LogoutButton from "./LogoutButton";
+import Image from "next/image";
 
 // Add the session prop with boolean type
 interface NavBarProps {
@@ -47,8 +48,23 @@ export default function NavBar({ session }: NavBarProps) {
                                 <div></div>
                             )}
                         </div>
-                    </div>
+                    </div> 
                 </div>
+                <button
+                    onClick={() => {
+                        const elem = document.documentElement;
+                        if (!document.fullscreenElement) {
+                            elem.requestFullscreen().catch((err) =>
+                                console.error(`Error trying to enter fullscreen: ${err.message}`)
+                            );
+                        } else {
+                            document.exitFullscreen();
+                        }
+                    }}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer absolute right-3 top-3"
+                    >
+                    <i className="fa-solid fa-expand text-white fa-2xl"></i>
+                </button>
             </div>
         </Disclosure>
     )
