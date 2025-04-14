@@ -251,6 +251,7 @@ export default function ClientesPage() {
         onRowExpandToggled={(bool, row) => setCurrentRow(row)}
         expandOnRowClicked
         highlightOnHover
+        noDataComponent={<div className="m-8">No hay registros para visualizar</div>}
       />
       
     </div>

@@ -196,14 +196,14 @@ export default function Home() {
         )}
         
         <DataTable
-          title="Cupones por vencer"
+          title="Cupones por vencerse"
           columns={columns}
           data={sortedExpiringCupones}
           conditionalRowStyles={conditionalRowStyles}
           pagination
           persistTableHead
           customStyles={customStyles}
-          
+          noDataComponent={<div className="m-8">No hay registros para visualizar</div>}
         />
         
         {confirmingCupon && (

@@ -414,6 +414,7 @@ export default function CuponesPage() {
         onRowExpandToggled={(bool, row) => setCurrentRow(row)}
         expandOnRowClicked
         highlightOnHover
+        noDataComponent={<div className="m-8">No hay registros para visualizar</div>}
       />
       
       <script src="html5-qrcode.min.js"></script>
