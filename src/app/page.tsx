@@ -112,11 +112,11 @@ export default function Home() {
         return cliente ? cliente.telefono : 'N/A';
         },
       },
-      { name: 'Codigo', selector: (row: Cupon) => row.codigo },
+      { name: 'Codigo', selector: (row: Cupon) => row.codigo, grow: 0.8 },
       { name: 'Puntos', 
         selector: (row: Cupon) => row.puntos, 
         sortable: true, 
-        width: '120px', 
+        grow: 0.5, 
         conditionalCellStyles: [
           {
             when: () => true, // applies to every row
@@ -141,23 +141,6 @@ export default function Home() {
   
           return (
             <button
-              // onClick={async () => {
-              //   setLoading(true);
-              //   setMessage(""); // Clear any previous message
-              //   try {
-              //     const result = await redimirCupon(String(row.id));
-              //     console.log("Cupón redimido:", result);
-              //     setMessage("Cupón redimido exitosamente ✅");
-    
-              //     queryClient.invalidateQueries({ queryKey: ["cupones"] });
-                
-              //   } catch (error) {
-              //     console.error("Error redimiendo cupón:", error);
-              //     setMessage("❌ Hubo un error al redimir el cupón.");
-              //   } finally {
-              //     setLoading(false);
-              //   }
-              // }}
               onClick={() => setConfirmingCupon(row)}
               className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm cursor-pointer"
             >
@@ -165,7 +148,7 @@ export default function Home() {
             </button>
           )
         },
-        grow: 0.5
+        grow: 1.8
       },
       {
         name: '',
@@ -190,7 +173,7 @@ export default function Home() {
             </button>
           );
         },
-        $grow: 3
+        $grow: 2
       },
     ];
 
