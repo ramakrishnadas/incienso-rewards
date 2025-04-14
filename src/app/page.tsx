@@ -63,6 +63,11 @@ export default function Home() {
   ];
 
   const customStyles = {
+    table: {
+      style: {
+        border: '1px solid #D3D3D3',
+      },
+    },
     header: {
       style: {
         backgroundColor: '#fffbeb',
@@ -76,6 +81,14 @@ export default function Home() {
         fontWeight: 'bold'
       },
     },
+    pagination: {
+      style: {
+        backgroundColor: '#fffbeb',
+        marginTop: '10px',
+        padding: '10px',
+        color: '#000000'
+      }
+    }
     
   };
 
