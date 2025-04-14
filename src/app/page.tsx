@@ -2,10 +2,12 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { daysUntilExpiration, fetchClients, fetchCupones, redimirCupon } from "./lib/helper";
+import { daysUntilExpiration, fetchClients, fetchCupones, formatDate, redimirCupon } from "./lib/helper";
 import { Cliente, Cupon } from "./lib/definitions";
 import DataTable from "react-data-table-component";
 import HiddenCoupon from "./components/HiddenCoupon";
+import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
+import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 
 export default function Home() {
 
@@ -60,20 +62,43 @@ export default function Home() {
     },
   ];
 
+  const customStyles = {
+    header: {
+      style: {
+        backgroundColor: '#fffbeb',
+        fontSize: '20px',
+        fontWeight: 'bold',
+      },
+    },
+    headRow: {
+      style: {
+        backgroundColor: '#ffffff',
+        fontWeight: 'bold'
+      },
+    },
+    
+  };
+
   const columns = [
-      { name: 'ID', selector: (row: Cupon) => row.id },
+      { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
       { name: 'Nombre del Cliente', selector: (row: Cupon) => {
-              if (!clientes) return false;
-              const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
-              return cliente ? cliente.nombre : 'N/A';
-              }, sortable: true, $grow: 2
-            },
+        if (!clientes) return false;
+        const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
+        return cliente ? cliente.nombre : 'N/A';
+        }, sortable: true, $grow: 2
+      },
+      { name: 'Teléfono del Cliente', selector: (row: Cupon) => {
+        if (!clientes) return false;
+        const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
+        return cliente ? cliente.telefono : 'N/A';
+        },
+      },
       { name: 'Codigo', selector: (row: Cupon) => row.codigo },
       { name: 'Puntos', selector: (row: Cupon) => row.puntos, sortable: true, },
       { name: 'Fecha de Vencimiento', selector: (row: Cupon) => {
-        const date = new Date(row.fecha_vencimiento); // Convert to Date object
-        const onlyDate = date.toISOString().split('T')[0];
-        return onlyDate;
+        const fechaVencimiento = new Date(row.fecha_vencimiento); // Convert to Date object
+        const formattedDate = formatDate(fechaVencimiento);
+        return formattedDate;
         }, $grow: 2
       },
       { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
@@ -157,8 +182,9 @@ export default function Home() {
           data={sortedExpiringCupones}
           conditionalRowStyles={conditionalRowStyles}
           pagination
-          subHeader
           persistTableHead
+          customStyles={customStyles}
+          className="custom-table"
         />
         
         

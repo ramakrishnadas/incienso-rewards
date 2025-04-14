@@ -5,7 +5,7 @@ import { Cliente, Cupon } from "../lib/definitions";
 import styled from 'styled-components';
 import DataTable from "react-data-table-component";
 import React, { ChangeEvent, useEffect, useRef } from "react";
-import { fetchClients, fetchCupones, redimirCupon } from "../lib/helper";
+import { fetchClients, fetchCupones, formatDate, redimirCupon } from "../lib/helper";
 import HiddenCoupon from "../components/HiddenCoupon";
 import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
 
@@ -159,6 +159,7 @@ export default function CuponesPage() {
     puntos: number;
   } | null>(null);
   const [redimidoFilter, setRedimidoFilter] = React.useState<'No' | 'Sí' | 'Todos'>('No');
+  const [showExpired, setShowExpired] = React.useState(false);
 
 
   const queryClient = useQueryClient();
@@ -182,26 +183,46 @@ export default function CuponesPage() {
 
   if (isLoading) return <p>Cargando...</p>;
 
+  const conditionalRowStyles = [
+    {
+      when: (row: Cupon) => {
+        const today = new Date();
+        const expiration = new Date(row.fecha_vencimiento);
+        return expiration < today;
+      },
+      style: {
+        backgroundColor: '#fed7aa',
+        
+      },
+    },
+  ];
+
   const columns = [
-    { name: 'ID', selector: (row: Cupon) => row.id },
+    { name: 'ID', selector: (row: Cupon) => row.id, width: '80px' },
     { name: 'Nombre del Cliente', selector: (row: Cupon) => {
-            if (!clientes) return false;
-            const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
-            return cliente ? cliente.nombre : 'N/A';
-            }, sortable: true, grow: 2
-          },
+      if (!clientes) return false;
+      const cliente = clientes.find((c: Cupon) => c.id === row.cliente_id);
+      return cliente ? cliente.nombre : 'N/A';
+      }, sortable: true, grow: 2
+    },
+    { name: 'Teléfono del Cliente', selector: (row: Cupon) => {
+      if (!clientes) return false;
+      const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
+      return cliente ? cliente.telefono : 'N/A';
+      }, grow: 2
+    },
     { name: 'Codigo', selector: (row: Cupon) => row.codigo },
     { name: 'Puntos', selector: (row: Cupon) => row.puntos, sortable: true, },
     { name: 'Fecha de Creación', selector: (row: Cupon) => {
-      const date = new Date(row.fecha_creacion); // Convert to Date object
-      const onlyDate = date.toISOString().split('T')[0];
-      return onlyDate;
+      const fechaCreacion = new Date(row.fecha_creacion); // Convert to Date object
+      const formattedDate = formatDate(fechaCreacion);
+      return formattedDate;
       }, grow: 2
     },
     { name: 'Fecha de Vencimiento', selector: (row: Cupon) => {
-      const date = new Date(row.fecha_vencimiento); // Convert to Date object
-      const onlyDate = date.toISOString().split('T')[0];
-      return onlyDate;
+      const fechaVencimiento = new Date(row.fecha_vencimiento); // Convert to Date object
+      const formattedDate = formatDate(fechaVencimiento);
+      return formattedDate;
       }, grow: 2
     },
     { name: 'Redimido', selector: (row: Cupon) => row.redimido ? 'Sí' : 'No'},
@@ -273,7 +294,7 @@ export default function CuponesPage() {
     },
   ];
 
-	const filteredItems = cupones.filter((c: Cupon) => {
+	const filteredItems = cupones?.filter((c: Cupon) => {
     if (!clientes) return false;
   
     const cliente = clientes.find((cl: Cliente) => cl.id === c.cliente_id);
@@ -288,8 +309,11 @@ export default function CuponesPage() {
       redimidoFilter === 'Todos' ||
       (redimidoFilter === 'Sí' && c.redimido) ||
       (redimidoFilter === 'No' && !c.redimido);
+
+    const isExpired = new Date(c.fecha_vencimiento) < new Date();
+    const matchesExpiration = showExpired || !isExpired;
   
-    return matchesTextFilter && matchesRedimidoFilter;
+    return matchesTextFilter && matchesRedimidoFilter && matchesExpiration;
     
     }
 	);
@@ -318,11 +342,27 @@ export default function CuponesPage() {
           <option value="Sí">Redimidos</option>
           <option value="Todos">Todos</option>
         </select>
+        <br />
+        <div className="rounded-md bg-orange-200 p-1.5 ml-10">
+          <label className="flex items-center text-sm gap-2">
+            <input
+              type="checkbox"
+              checked={showExpired}
+              onChange={(e) => setShowExpired(e.target.checked)}
+              className="accent-blue-500"
+            />
+            Mostrar vencidos
+          </label>
+        </div>
       </div>
+
+      
+
       <DataTable
         title=""
         columns={columns}
         data={filteredItems}
+        conditionalRowStyles={conditionalRowStyles}
         pagination
         paginationResetDefaultPage={resetPaginationToggle}
         subHeader
@@ -344,7 +384,8 @@ export default function CuponesPage() {
           }}
         />
       )}
-      
+      <script src="html5-qrcode.min.js"></script>
     </div>
+    
   );
 }

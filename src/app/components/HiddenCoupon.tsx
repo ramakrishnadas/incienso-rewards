@@ -25,8 +25,6 @@ const HiddenCoupon: React.FC<HiddenCouponProps> = ({ codigo, clienteNombre, fech
         fontSize: 50,
         textMargin: 25,
         margin: 20,
-        // lineColor: "#ffffff",
-        // background: "#414d52"
       });
     }
 

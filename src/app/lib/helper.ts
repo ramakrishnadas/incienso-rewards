@@ -53,3 +53,11 @@ export function daysUntilExpiration(fecha: string): number {
     const diff = expiration.getTime() - today.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24)); // Convert ms to days
 }
+
+export function formatDate(fecha: Date) {
+    const day = String(fecha.getDate()).padStart(2, '0');
+    const month = String(fecha.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = fecha.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+    return formattedDate;
+}

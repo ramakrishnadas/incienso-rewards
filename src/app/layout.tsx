@@ -49,7 +49,7 @@ export default async function RootLayout({
             {children}
           </Providers>
         </div>
-        <script src="html5-qrcode.min.js"></script>
+        
       </body>
     </html>
   );

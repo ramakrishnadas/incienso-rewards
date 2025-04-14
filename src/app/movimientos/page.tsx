@@ -4,7 +4,7 @@ import { Movimiento, Cliente } from "../lib/definitions";
 import styled from 'styled-components';
 import DataTable from "react-data-table-component";
 import React from "react";
-import { fetchClients, fetchMovimientos } from "../lib/helper";
+import { fetchClients, fetchMovimientos, formatDate } from "../lib/helper";
 import Link from "next/link";
 
 const TextField = styled.input`
@@ -107,14 +107,23 @@ export default function MovimientosPage() {
         }, grow: 2
       },
       { name: 'Tipo', selector: (row: Movimiento) => row.tipo, sortable: true, grow: 2.5 },
-      { name: 'Monto', selector: (row: Movimiento) => row.monto },
+      { name: 'Monto', selector: (row: Movimiento) => {
+        
+        const formattedMonto = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+          }).format(parseFloat(row.monto));
+          return row.monto ? formattedMonto : "";
+        } 
+      },
       { name: 'Ticket', selector: (row: Movimiento) => row.ticket, grow: 2 },
       { name: 'Puntos', selector: (row: Movimiento) => row.puntos, sortable: true },
       { name: 'Tasa de Puntos', selector: (row: Movimiento) => row.tasa_puntos, grow: 2 },
       { name: 'Fecha', selector: (row: Movimiento) => {
-        const date = new Date(row.fecha); // Convert to Date object
-        const onlyDate = date.toISOString().split('T')[0];
-        return onlyDate;
+        const fecha = new Date(row.fecha);
+        const formattedDate = formatDate(fecha);
+        return formattedDate;
         }
       },
       {
