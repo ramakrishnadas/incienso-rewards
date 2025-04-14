@@ -148,7 +148,7 @@ export default function Home() {
             </button>
           )
         },
-        grow: 1.8
+        grow: 1.2
       },
       {
         name: '',
