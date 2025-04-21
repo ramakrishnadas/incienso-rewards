@@ -69,6 +69,8 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cliente>> = ({ data }) 
 	return (
     <>
       <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
+        <p><span className="font-bold">Dirección: </span>{data.direccion}</p>
+        <p><span className="font-bold">Código Postal: </span>{data.codigo_postal}</p>
         <Link href={`/movimientos/nuevo?cliente_id=${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
           Registrar Compra
         </Link>
@@ -151,7 +153,6 @@ export default function ClientesPage() {
   };
 
   const columns = [
-    // { name: 'ID', selector: (row: Cliente) => row.id },
     { name: 'Nombre', selector: (row: Cliente) => row.nombre, sortable: true, grow: 2},
     { name: 'Teléfono', selector: (row: Cliente) => row.telefono, grow: 1.2},
     { name: 'Email', selector: (row: Cliente) => row.email, grow: 2 },

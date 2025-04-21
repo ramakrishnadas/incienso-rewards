@@ -15,11 +15,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const { nombre, telefono, email, puntos, puede_referir, referido_por } = await request.json();
+        const { nombre, telefono, email, puntos, puede_referir, referido_por, direccion, codigo_postal } = await request.json();
 
         const [result] = await pool.query<ResultSetHeader>(
-            'INSERT INTO clientes (nombre, telefono, email, puntos, puede_referir, referido_por) VALUES (?, ?, ?, ?, ?, ?)',
-            [nombre, telefono, email, puntos, puede_referir, referido_por || null]
+            'INSERT INTO clientes (nombre, telefono, email, puntos, puede_referir, referido_por, direccion, codigo_postal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [nombre, telefono, email, puntos, puede_referir, referido_por || null, direccion, codigo_postal]
         );
 
         

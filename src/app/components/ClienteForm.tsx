@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchClients } from "../lib/helper";
-import { Cliente } from "../lib/definitions";
+import { Cliente, Direccion } from "../lib/definitions";
 
 export default function ClienteForm({ clienteId }: { clienteId?: string }) {
   const [formData, setFormData] = useState({
@@ -12,6 +12,8 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
     telefono: "",
     email: "",
     puntos: 0,
+    direccion: "",
+    codigo_postal: "",
     puede_referir: false,
     referido_por: null,
   });
@@ -21,6 +23,9 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [codigoPostal, setCodigoPostal] = useState("");
+  const [colonias, setColonias] = useState([]);
+  const [coloniaSeleccionada, setColoniaSeleccionada] = useState("");
 
   const { data: clientes } = useQuery({ queryKey: ["clientes"], queryFn: fetchClients });
 
@@ -28,10 +33,33 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
     if (clienteId) {
       fetch(`/api/clientes/${clienteId}`)
         .then((res) => res.json())
-        .then((data) => setFormData(data))
+        .then((data) =>
+          setFormData({
+            nombre: data.nombre || "",
+            telefono: data.telefono || "",
+            email: data.email || "",
+            puntos: data.puntos ?? 0,
+            direccion: "",
+            codigo_postal: "",
+            puede_referir: data.puede_referir ?? false,
+            referido_por: data.referido_por ?? "",
+          })
+        )
         .catch((err) => console.error(err));
     }
   }, [clienteId]);
+
+  const handleBlur = async () => {
+    const res = await fetch("/codigos_postales.json");
+    const data = await res.json();
+
+    const filtered = data
+      .filter((item: Direccion) => item.codigo_postal === codigoPostal.trim())
+      .map((item: Direccion) => item.colonia);
+
+    setColonias(filtered);
+    setColoniaSeleccionada("");
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -120,6 +148,42 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
             onChange={handleChange}
             className="w-full border px-3 py-2 rounded text-black"
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700">Código Postal</label>
+          <input
+            type="text"
+            name="codigo_postal"
+            value={formData.codigo_postal}
+            onChange={(e) => {
+              handleChange(e); // update formData
+              setCodigoPostal(e.target.value); // also update local state if needed
+            }}
+            onBlur={handleBlur}
+            placeholder="Código Postal"
+            className="w-full border px-3 py-2 rounded text-black"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700">Direccion</label>
+          <input
+            list="colonias-list"
+            name="direccion"
+            value={formData.direccion}
+            onChange={(e) => {
+              handleChange(e); // update formData
+              setColoniaSeleccionada(e.target.value); // optional
+            }}
+            placeholder="Colonia"
+            className="w-full border px-3 py-2 rounded text-black"
+          />
+          <datalist id="colonias-list">
+            {colonias.map((colonia, index) => (
+              <option key={index} value={colonia} />
+            ))}
+          </datalist>
         </div>
 
         {/* <div className="mb-4">

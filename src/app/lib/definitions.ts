@@ -6,6 +6,8 @@ export type Cliente = {
     puntos: number;
     puede_referir: number;
     referido_por: number;
+    direccion: string;
+    codigo_postal: string;
 }
 
 export type Movimiento = {
@@ -27,4 +29,9 @@ export type Cupon = {
     fecha_creacion: Date;
     fecha_vencimiento: Date;
     redimido: boolean;
+}
+
+export type Direccion = {
+    codigo_postal: string;
+    colonia: string;
 }

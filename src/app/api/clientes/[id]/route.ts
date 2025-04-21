@@ -32,11 +32,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
 
-        const { nombre, telefono, email, puntos, puede_referir, referido_por } = await request.json();
+        const { nombre, telefono, email, puntos, puede_referir, referido_por, direccion, codigo_postal } = await request.json();
 
         const [result] = await pool.query<ResultSetHeader>(
-            'UPDATE clientes SET nombre = ?, telefono = ?, email = ?, puntos = ?, puede_referir = ?, referido_por = ? WHERE id = ?',
-            [nombre, telefono, email, puntos, puede_referir, referido_por || null, id]
+            'UPDATE clientes SET nombre = ?, telefono = ?, email = ?, puntos = ?, puede_referir = ?, referido_por = ?, direccion = ?, codigo_postal = ? WHERE id = ?',
+            [nombre, telefono, email, puntos, puede_referir, referido_por || null, direccion, codigo_postal, id]
         );
 
         if (result.affectedRows === 0) {
