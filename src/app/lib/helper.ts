@@ -61,3 +61,8 @@ export function formatDate(fecha: Date) {
     const formattedDate = `${day}/${month}/${year}`;
     return formattedDate;
 }
+
+export const fetchLastRowClientes = async () => {
+    const res = await fetch('/api/last-row-clientes');
+    return res.json();
+};

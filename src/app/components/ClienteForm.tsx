@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchClients } from "../lib/helper";
+import { fetchClients, fetchLastRowClientes } from "../lib/helper";
 import { Cliente, Direccion } from "../lib/definitions";
 
 export default function ClienteForm({ clienteId }: { clienteId?: string }) {
@@ -92,8 +92,10 @@ export default function ClienteForm({ clienteId }: { clienteId?: string }) {
 
       setSuccess(clienteId ? "Cliente modificado exitosamente" : "Cliente creado exitosamente");
 
+      const lastRow = await fetchLastRowClientes();
+
       setTimeout(() => {
-        router.push("/clientes");
+        router.push(`/movimientos/nuevo?cliente_id=${lastRow.id}`);
       }, 1500); // Slight delay to show success message
 
     } catch (err: unknown) {

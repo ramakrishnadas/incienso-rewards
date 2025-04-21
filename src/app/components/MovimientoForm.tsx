@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { fetchClients, calculatePoints } from "../lib/helper";
+import { fetchClients, calculatePoints, formatDate } from "../lib/helper";
 import { Cliente } from "../lib/definitions";
 import Html5QrcodePlugin from "./Html5QrcodeScannerPlugin";
 
@@ -34,16 +34,20 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
     cliente = clientes?.find((c: Cliente) => c.id === parseInt(clienteId));
   }
   
-
   useEffect(() => {
     if (movimientoId) {
       fetch(`/api/movimientos/${movimientoId}`)
         .then((res) => res.json())
         .then((data) => {
-          const formattedDate = new Date(data.fecha).toISOString().split('T')[0];
+          const fechaSinFormato = new Date(data.fecha);
+          const formattedDate = formatDate(fechaSinFormato);
           setFormData({
             ...data,
-            fecha: formattedDate,
+            monto: data.monto ?? "",
+            ticket: data.ticket ?? "",
+            puntos: data.puntos ?? 0,
+            tasa_puntos: data.tasa_puntos ?? 1,
+            fecha: formattedDate ? formattedDate : new Date(),
           });
         })
         .catch((err) => console.error(err));
