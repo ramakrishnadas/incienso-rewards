@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { fetchClients, calculatePoints } from "../lib/helper";
 import { Cliente } from "../lib/definitions";
+import Html5QrcodePlugin from "./Html5QrcodeScannerPlugin";
 
 export default function MovimientoForm({ movimientoId, clienteId }: { movimientoId?: string, clienteId?: string }) {
   const [formData, setFormData] = useState({
@@ -22,6 +23,9 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const ticketInputRef = useRef<HTMLInputElement>(null);
+  const html5QrcodeScannerRef = useRef<any>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   const { data: clientes } = useQuery({ queryKey: ["clientes"], queryFn: fetchClients });
   
@@ -59,6 +63,12 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
       }));
     }
   }, [formData.monto, formData.tasa_puntos]);
+
+  const handleScanSuccess = (decodedText: string) => {
+    setFormData((prev) => ({ ...prev, ticket: decodedText }));
+    html5QrcodeScannerRef.current?.stopScanning?.();
+    setShowScanner(false);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -143,18 +153,46 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
           </div>
         )}
         
+        <div className="mb-4 relative">
+          <label className="block text-gray-700">Ticket</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              name="ticket"
+              ref={ticketInputRef}
+              value={formData.ticket}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded text-black"
+            />
+            <button
+              type="button"
+              onClick={() => setShowScanner(true)}
+              className="bg-blue-500 text-white px-3 py-1 rounded text-sm cursor-pointer"
+            >
+              Escanear
+            </button>
+          </div>
         
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Ticket</label>
-          <input
-            type="text"
-            name="ticket"
-            value={formData.ticket}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded text-black"
-          />
+          {showScanner && (
+            <div className="absolute z-50 top-full left-0 mt-2 bg-white shadow-lg p-2 rounded">
+              <Html5QrcodePlugin
+                ref={html5QrcodeScannerRef}
+                fps={10}
+                qrbox={250}
+                disableFlip={false}
+                qrCodeSuccessCallback={handleScanSuccess}
+              />
+              <button
+                onClick={() => setShowScanner(false)}
+                className="mt-2 px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-xs cursor-pointer"
+              >
+                Cerrar escáner
+              </button>
+            </div>
+          )}
         </div>
+      
 
         <div className="mb-4">
           <label className="block text-gray-700">Monto</label>

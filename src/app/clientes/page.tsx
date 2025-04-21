@@ -70,7 +70,7 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cliente>> = ({ data }) 
     <>
       <div className="flex p-5 border-1 border-gray-400 space-x-4 justify-evenly items-center">
         <p><span className="font-bold">Dirección: </span>{data.direccion}</p>
-        <p><span className="font-bold">Código Postal: </span>{data.codigo_postal}</p>
+        <p><span className="font-bold">C. P.: </span>{data.codigo_postal}</p>
         <Link href={`/movimientos/nuevo?cliente_id=${data.id}`} className="text-blue-500 ml-2 hover:bg-gray-200 p-2 rounded-sm">
           Registrar Compra
         </Link>

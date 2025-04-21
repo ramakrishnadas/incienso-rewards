@@ -118,20 +118,20 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
   const clienteNombre = cliente ? cliente.nombre : "Cliente";
   const fechaVencimiento = formatDate(new Date(data.fecha_vencimiento));
 
-  const handleRedimir = async () => {
-    setLoading(true);
-    setMessage("");
-    try {
-      await redimirCupon(String(data.id));
-      setMessage("Cupón redimido exitosamente ✅");
-      queryClient.invalidateQueries({ queryKey: ["cupones"] });
-    } catch (error) {
-      console.error(error);
-      setMessage("❌ Hubo un error al redimir el cupón.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleRedimir = async () => {
+  //   setLoading(true);
+  //   setMessage("");
+  //   try {
+  //     await redimirCupon(String(data.id));
+  //     setMessage("Cupón redimido exitosamente ✅");
+  //     queryClient.invalidateQueries({ queryKey: ["cupones"] });
+  //   } catch (error) {
+  //     console.error(error);
+  //     setMessage("❌ Hubo un error al redimir el cupón.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <>
