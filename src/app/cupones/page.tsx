@@ -293,7 +293,8 @@ export default function CuponesPage() {
         if (!clientes) return null;
         const cliente = clientes.find((c: Cliente) => c.id === row.cliente_id);
         if (!cliente) return 'N/A';
-        const message = "🎉 ¡Felicidades! 🎉\nHas acumulado suficientes puntos en nuestro programa de recompensas y ¡ya tienes un cupón listo para usar! 🛍️✨\n\nPuedes canjearlo en tu próxima compra en nuestra tienda. ¡Es nuestra manera de agradecerte por tu preferencia y lealtad! 🙌\n\n📍 Visítanos y disfruta de tu recompensa.\nSi tienes dudas, no dudes en consultarnos.\n\n¡Te esperamos con gusto! 😊";
+        const primerNombre = cliente.nombre.split(" ")[0];
+        const message = `🎉 ¡Felicidades, ${primerNombre}! 🎉\n\n Te escribimos de Incienso Store para darte una excelente noticia:\n\nHas acumulado suficientes puntos en nuestro programa de recompensas y ¡ya tienes un cupón listo para usar! 🛍️✨\n\nPuedes canjearlo en tu próxima compra en nuestra tienda. ¡Es nuestra manera de agradecerte por tu preferencia y lealtad! 🙌\n\n📍 Visítanos y disfruta de tu recompensa.\nSi tienes dudas, no dudes en consultarnos.\n\n¡Te esperamos con gusto! 😊`;
         const encodedMessage = encodeURIComponent(message);
         const link = `https://wa.me/52${cliente.telefono}?text=${encodedMessage}`;
     
