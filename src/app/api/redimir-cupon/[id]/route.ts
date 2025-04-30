@@ -18,19 +18,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             [redimido, id]
         );
 
-        const [cupon] = await pool.query<RowDataPacket[]>(
-            'SELECT * FROM cupones WHERE id = ?',
-            [id]
-        );
-
-        const clienteId = cupon[0].cliente_id;
-        const clientePuntos = cupon[0].puntos;
-
-        const [updatePoints] = await pool.query<ResultSetHeader>(
-            'UPDATE clientes SET puntos = puntos - ? WHERE id = ?',
-            [clientePuntos, clienteId]
-        );
-
         if (result.affectedRows === 0) {
             return NextResponse.json({ error: 'Cupón not found' }, { status: 404 });
         }

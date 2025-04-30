@@ -90,11 +90,6 @@ export async function POST(request: Request) {
 
                 break
             case "Canje":
-                const [canjeResult] = await pool.query<ResultSetHeader>(
-                    'UPDATE clientes SET puntos = puntos - ? WHERE id = ?',
-                    [puntos, cliente_id]
-                );
-                console.log(canjeResult);
                 break;
         }
         
@@ -130,44 +125,47 @@ function generarCodigoAleatorio() {
 async function crearCupon(clienteId: string) {
     // Buscar cliente
     const [cliente] = await pool.query<RowDataPacket[]>(
-        'SELECT * FROM clientes WHERE id = ?',
-        [clienteId]
+      'SELECT * FROM clientes WHERE id = ?',
+      [clienteId]
     );
-
+  
     const puntos = cliente[0].puntos;
-
+  
     // Check if cliente has more than 50 points
     if (puntos >= 50) {
-        // Generate a unique coupon code
-        const codigo = await generarCodigoCupon();
-    
-        // Get current date and calculate expiration date (3 months from now)
-        const fechaCreacion = new Date().toISOString();
-        const fechaVencimiento = new Date(fechaCreacion);
-        fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 3);
-        const fechaVencimientoString = fechaVencimiento.toISOString();
-        
-        const redimido = false;
-    
+      // Generate a unique coupon code
+      const codigo = await generarCodigoCupon();
+  
+      // Get current date and calculate expiration date (3 months from now)
+      const fechaCreacion = new Date().toISOString();
+      const fechaVencimiento = new Date(fechaCreacion);
+      fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 3);
+      const fechaVencimientoString = fechaVencimiento.toISOString();
+  
+      const redimido = false;
+  
+      try {
         // Insert the coupon into the database
-        try {
-            const [result] = await pool.query<ResultSetHeader>(
-                'INSERT INTO cupones (cliente_id, codigo, puntos, fecha_creacion, fecha_vencimiento, redimido) VALUES (?, ?, ?, ?, ?, ?)',
-                [clienteId, codigo, puntos, fechaCreacion, fechaVencimientoString, redimido]
-            );
-        
-            // console.log(result);
-        } catch (error) {
-            console.error('Failed to make request:', error);
-        }
-        
-        console.log('Cupon creado con éxito para el cliente:', clienteId);
-
-        
-
-        return { codigo, fechaVencimiento: fechaVencimiento };
+        const [result] = await pool.query<ResultSetHeader>(
+          'INSERT INTO cupones (cliente_id, codigo, puntos, fecha_creacion, fecha_vencimiento, redimido) VALUES (?, ?, ?, ?, ?, ?)',
+          [clienteId, codigo, puntos, fechaCreacion, fechaVencimientoString, redimido]
+        );
+  
+        // Deduct the points from the cliente
+        const [updatePoints] = await pool.query<ResultSetHeader>(
+          'UPDATE clientes SET puntos = puntos - ? WHERE id = ?',
+          [puntos, clienteId]
+        );
+  
+        console.log('Cupón creado con éxito para el cliente:', clienteId);
+        return { codigo, fechaVencimiento };
+      } catch (error) {
+        console.error('Error al crear el cupón:', error);
+        return null;
+      }
     } else {
-      console.log('Cliente no tiene suficientes puntos para un cupon.');
-      return null;  // Cliente doesn't have enough points
+      console.log('Cliente no tiene suficientes puntos para un cupón.');
+      return null;
     }
   }
+  

@@ -10,6 +10,8 @@ export default function MovimientoPage() {
 
   const searchParams = useSearchParams();
   const clienteId = searchParams.get("cliente_id");
+  const puntosDescontadosURL = searchParams.get("puntos_descontados");
+  const puntosDescontados = puntosDescontadosURL ? parseInt(puntosDescontadosURL) : undefined;
 
   const pathname = usePathname();
 
@@ -19,7 +21,7 @@ export default function MovimientoPage() {
       {pathname.includes('canje') ? (
           <CanjeForm clienteId={clienteId ?? ""} />
         ) : (
-          <MovimientoForm movimientoId={movimientoId === "nuevo" ? undefined : movimientoId} clienteId={clienteId ?? ""} />
+          <MovimientoForm movimientoId={movimientoId === "nuevo" ? undefined : movimientoId} clienteId={clienteId ?? ""} puntosDescontados={puntosDescontados} />
         )
       }
     </div>

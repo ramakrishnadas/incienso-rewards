@@ -7,7 +7,7 @@ import { fetchClients, calculatePoints, formatDate } from "../lib/helper";
 import { Cliente } from "../lib/definitions";
 import Html5QrcodePlugin from "./Html5QrcodeScannerPlugin";
 
-export default function MovimientoForm({ movimientoId, clienteId }: { movimientoId?: string, clienteId?: string }) {
+export default function MovimientoForm({ movimientoId, clienteId, puntosDescontados }: { movimientoId?: string, clienteId?: string, puntosDescontados?: number }) {
   const [formData, setFormData] = useState({
     cliente_id: clienteId,
     tipo: "Compra",
@@ -26,7 +26,9 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
   const ticketInputRef = useRef<HTMLInputElement>(null);
   const html5QrcodeScannerRef = useRef<any>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [diferencia, setDiferencia] = useState<number | null>(null);
 
+  
   const { data: clientes } = useQuery({ queryKey: ["clientes"], queryFn: fetchClients });
   
   let cliente;
@@ -58,7 +60,20 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
     const montoNum = parseFloat(formData.monto);
     const tasa_puntosNum = formData.tasa_puntos;
 
-    const pointsString = calculatePoints(montoNum, tasa_puntosNum).toString()
+    const diferenciaCalculada =
+      puntosDescontados !== undefined && !isNaN(montoNum)
+        ? montoNum - puntosDescontados
+        : 0;
+
+    setDiferencia(diferenciaCalculada);
+
+    let pointsString;
+    if (puntosDescontados) {
+      pointsString = calculatePoints(diferenciaCalculada, tasa_puntosNum).toString();
+    } else {
+      pointsString = calculatePoints(montoNum, tasa_puntosNum).toString();
+    }
+    
 
     if (!isNaN(montoNum) && !isNaN(tasa_puntosNum)) {
       setFormData((prev) => ({
@@ -89,6 +104,29 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
     setSuccess(null);
 
     try {
+
+      if (puntosDescontados) {
+        const response = await fetch(
+          movimientoId ? `/api/movimientos/${movimientoId}` : "/api/movimientos",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              cliente_id: formData.cliente_id, 
+              tipo: "Canje", 
+              monto: null, 
+              ticket: formData.ticket,
+              puntos: puntosDescontados,
+              tasa_puntos: formData.tasa_puntos,
+              fecha: formData.fecha
+            }),
+          }
+        );
+  
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Error guardando el movimiento de canje");
+      }
+
       const method = movimientoId ? "PUT" : "POST";
       const response = await fetch(
         movimientoId ? `/api/movimientos/${movimientoId}` : "/api/movimientos",
@@ -210,6 +248,11 @@ export default function MovimientoForm({ movimientoId, clienteId }: { movimiento
             className="w-full border px-3 py-2 rounded text-black"
           />
         </div>
+        {puntosDescontados && (
+          <div className="mb-4">
+            <label className="block text-gray-700">Monto - Puntos Descontados = {diferencia}</label>
+          </div>
+        )}
 
         <div className="mb-4">
           <label className="block text-gray-700">Tasa de Puntos</label>

@@ -9,6 +9,7 @@ import { fetchClients, fetchCupones, formatDate, redimirCupon } from "../lib/hel
 import HiddenCoupon from "../components/HiddenCoupon";
 import Html5QrcodePlugin from "../components/Html5QrcodeScannerPlugin";
 import ConfirmationModal from "../components/ConfirmationModal";
+import { useRouter } from "next/navigation";
 
 const TextField = styled.input`
 	height: 32px;
@@ -112,26 +113,12 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
     puntos: number;
   } | null>(null);
   const [confirmingCupon, setConfirmingCupon] = React.useState<Cupon | null>(null);
-  
 
+  const router = useRouter();
+  
   const cliente = queryClient.getQueryData<Cliente[]>(["clientes"])?.find(c => c.id === data.cliente_id);
   const clienteNombre = cliente ? cliente.nombre : "Cliente";
   const fechaVencimiento = formatDate(new Date(data.fecha_vencimiento));
-
-  // const handleRedimir = async () => {
-  //   setLoading(true);
-  //   setMessage("");
-  //   try {
-  //     await redimirCupon(String(data.id));
-  //     setMessage("Cupón redimido exitosamente ✅");
-  //     queryClient.invalidateQueries({ queryKey: ["cupones"] });
-  //   } catch (error) {
-  //     console.error(error);
-  //     setMessage("❌ Hubo un error al redimir el cupón.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <>
@@ -162,10 +149,18 @@ const ExpandedComponent: React.FC<ExpanderComponentProps<Cupon>> = ({ data }) =>
           onConfirm={async () => {
             setLoading(true);
             setMessage("");
+
+            const puntosDescontados = confirmingCupon.puntos;
             try {
               await redimirCupon(String(confirmingCupon.id));
               setMessage("Cupón redimido exitosamente ✅");
-              queryClient.invalidateQueries({ queryKey: ["cupones"] });
+
+              const params = new URLSearchParams({
+                cliente_id: confirmingCupon.cliente_id.toString(),
+                puntos_descontados: puntosDescontados.toString(),
+              });
+              
+              router.push(`/movimientos/nuevo?${params.toString()}`);
             } catch (error) {
               console.error("Error redimiendo cupón:", error);
               setMessage("❌ Hubo un error al redimir el cupón.");
